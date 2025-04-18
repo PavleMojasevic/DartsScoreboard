@@ -8,5 +8,4 @@ public class KeyboardKey
 {
     public required string Text { get; set; }
     public required string Value { get; set; }
-    public int? WidthOverride { get; set; }
 }

@@ -8,7 +8,7 @@
             <div class="keyboard-row">
                 @foreach (KeyboardKey keyboardKey in keyboardRow)
                 {
-                    <div class="keyboard-key" @onclick="@(()=>KeyClick.InvokeAsync(keyboardKey))">
+                    <div class="keyboard-key"   @onclick="@(()=>KeyClick.InvokeAsync(keyboardKey))">
                         @keyboardKey.Text
                     </div>
                 }
