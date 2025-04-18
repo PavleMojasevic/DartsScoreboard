@@ -1,4 +1,4 @@
-﻿namespace DartsScoreboard.Pages;
+﻿namespace DartsScoreboard;
 
 public partial class Home
 {

@@ -1,0 +1,18 @@
+﻿@namespace DartsScoreboard
+
+@if (KeyboardParameters != null)
+{
+    <div class="keyboard-container">
+        @foreach (List<KeyboardKey> keyboardRow in KeyboardParameters.KeyboardKeys)
+        {
+            <div class="keyboard-row">
+                @foreach (KeyboardKey keyboardKey in keyboardRow)
+                {
+                    <div class="keyboard-key" @onclick="@(()=>KeyClick.InvokeAsync(keyboardKey))">
+                        @keyboardKey.Text
+                    </div>
+                }
+            </div>
+        }
+    </div>
+} 

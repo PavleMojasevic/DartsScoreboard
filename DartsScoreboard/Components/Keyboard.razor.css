@@ -1,0 +1,26 @@
+﻿.keyboard-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    gap: 5px; /* Fixed gap between rows */
+}
+
+.keyboard-row {
+    display: flex;
+    flex: 1;
+    gap: 5px; /* Fixed gap between keys */
+}
+
+.keyboard-key {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ddd;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: calc(1rem + 0.5vw); /* Adjust font size relative to key size */
+    text-align: center;
+    overflow: hidden; /* Prevent text overflow */
+}
