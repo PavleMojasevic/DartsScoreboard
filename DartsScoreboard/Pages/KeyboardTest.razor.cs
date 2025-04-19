@@ -5,7 +5,7 @@ public partial class KeyboardTest
     public string Text { get; set; } = "";
     public void KeyClick(KeyboardKey key)
     {
-        Text += key.Text;
+        Text += key.Value;
     }
     public KeyboardParameters KeyboardParameters = new KeyboardParameters
     {
