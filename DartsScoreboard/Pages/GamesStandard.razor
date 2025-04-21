@@ -1,0 +1,39 @@
+﻿@namespace DartsScoreboard
+@page "/gamesStandard"
+
+<h2>Game</h2>
+
+<div class="game-container">
+
+    <!-- Player Options -->
+    <div class="player-options">
+        <h4>Players</h4>
+    </div>
+
+    <!-- Game Options -->
+    <div class="game-options">
+        <h4>Game options</h4>
+        <div class="form-group">
+            <label>Starting score:</label>
+
+            <div class="btn-group" role="group">
+                @foreach (var score in StartingScoreOptions)
+                {
+                    <button type="button"
+                            class="btn @(SelectedScore == score ? "btn-primary" : "btn-outline-primary")"
+                            @onclick="() => SelectScore(score)">
+                        @score
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Button -->
+    <div class="start-button">
+        <button class="btn btn-primary" @onclick="StartGame">
+            Start
+        </button>
+    </div>
+
+</div>

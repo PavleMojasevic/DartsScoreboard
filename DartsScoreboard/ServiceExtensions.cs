@@ -8,7 +8,5 @@ public static class ServiceExtensions
     {
         services.AddTransient<IUserPersistence, UserPersistence>();
         services.AddSingleton<IIndexedDbFactory, IndexedDbFactory>();
-
-
     }
 }

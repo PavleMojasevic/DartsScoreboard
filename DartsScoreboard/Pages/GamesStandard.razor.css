@@ -1,0 +1,14 @@
+﻿.game-container {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: auto;
+    padding: 1rem;
+}
+
+.player-options, .game-options, .start-button {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+}
