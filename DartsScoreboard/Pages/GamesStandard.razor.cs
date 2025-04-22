@@ -5,17 +5,60 @@ namespace DartsScoreboard
     public partial class GamesStandard
     {
         public int SelectedScore { get; set; } = 501;
+        public string SelectedStartWith { get; set; } = "STRAIGHT IN";
+        public string SelectedEndWith { get; set; } = "DOUBLE OUT";
+        public string GameOptionsOutput { get; set; } = "211";
 
         public List<int> StartingScoreOptions { get; set; } = new() { 301, 501, 701 };
+        public List<string> StartingOptions { get; set; } = new() { "STRAIGHT IN", "DOUBLE IN", "MASTER IN" };
+        public List<string> EndingOptions { get; set; } = new() { "DOUBLE OUT", "MASTER OUT", "STRAIGHT OUT" };
 
         private void SelectScore(int score)
         {
             SelectedScore = score;
         }
+        private void SelectIn(string startWith)
+        {
+            SelectedStartWith = startWith;
+        }
+        private void SelectOut(string endWith)
+        {
+            SelectedEndWith = endWith;
+        }
+
+        private void GameOptionsOutputFunction()
+        {
+            char[] output = new char[3];
+            for (int i = 0; i < StartingScoreOptions.Count; i++)
+            {
+                if (StartingScoreOptions[i] == SelectedScore)
+                {
+                    output[0] = (char)('0' + i + 1);
+                }
+            }
+            for (int i = 0; i < StartingOptions.Count; i++)
+            {
+                if (StartingOptions[i] == SelectedStartWith)
+                {
+                    output[1] = (char)('0' + i + 1);
+                }
+            }
+            for (int i = 0; i < EndingOptions.Count; i++)
+            {
+                if (EndingOptions[i] == SelectedEndWith)
+                {
+                    output[2] = (char)('0' + i + 1);
+                }
+            }
+
+            GameOptionsOutput = new string(output);
+        }
+
         [Inject] NavigationManager NavManager { get; set; } = default!;
         private void StartGame()
         {
-            NavManager.NavigateTo($"/gameStandardPlay/{SelectedScore}");
+            GameOptionsOutputFunction();
+            NavManager.NavigateTo($"/gameStandardPlay/{Uri.EscapeDataString(GameOptionsOutput)}");
         }
     }
 }

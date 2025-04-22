@@ -13,9 +13,8 @@
     <!-- Game Options -->
     <div class="game-options">
         <h4>Game options</h4>
-        <div class="form-group">
-            <label>Starting score:</label>
-
+        <!-- Score Options -->
+        <div class="form-group mb-3">
             <div class="btn-group" role="group">
                 @foreach (var score in StartingScoreOptions)
                 {
@@ -23,6 +22,32 @@
                             class="btn @(SelectedScore == score ? "btn-primary" : "btn-outline-primary")"
                             @onclick="() => SelectScore(score)">
                         @score
+                    </button>
+                }
+            </div>
+        </div>
+        <!-- Start With Options -->
+        <div class="form-group mb-3">
+            <div class="btn-group" role="group">
+                @foreach (var startWith in StartingOptions)
+                {
+                    <button type="button"
+                            class="btn @(SelectedStartWith == startWith ? "btn-primary" : "btn-outline-primary")"
+                            @onclick="() => SelectIn(startWith)">
+                        @startWith
+                    </button>
+                }
+            </div>
+        </div>
+        <!-- End With Options -->
+        <div class="form-group">
+            <div class="btn-group" role="group">
+                @foreach (var endWith in EndingOptions)
+                {
+                    <button type="button"
+                            class="btn @(SelectedEndWith == endWith ? "btn-primary" : "btn-outline-primary")"
+                            @onclick="() => SelectOut(endWith)">
+                        @endWith
                     </button>
                 }
             </div>

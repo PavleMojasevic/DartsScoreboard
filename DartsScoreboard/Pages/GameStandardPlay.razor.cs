@@ -5,6 +5,7 @@ namespace DartsScoreboard
     public partial class GameStandardPlay
     {
         [Parameter]
-        public int StartingScore { get; set; }
+        public string GameOptionsOutput { get; set; }
+        public string DecodedOptions => Uri.UnescapeDataString(GameOptionsOutput);
     }
 }
