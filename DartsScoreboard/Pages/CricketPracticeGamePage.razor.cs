@@ -5,11 +5,13 @@ namespace DartsScoreboard;
 public partial class CricketPracticeGamePage
 {
     [Inject] public ICricketPracticeGamePersistence _CricketPracticeGamePersistence { get; set; }
+    [Inject] public IUserPersistence _UserPersistence { get; set; }
     [Parameter] public string? code { get; set; }
     public CricketPracticeGame CricketPracticeGame { get; set; } = new();
     public bool IsNew { get; set; }
     public string CurrentTarget { get; set; } = "";
-    public CricketPracticeGamePlayer PlayerOnTurn { get; set; }
+    public List<CricketPracticePlayerPresenter> Players { get; set; } = new();
+    public int PlayerOnTurnIndex { get; set; }
     protected override async Task OnParametersSetAsync()
     {
         if (code == null)
@@ -18,25 +20,44 @@ public partial class CricketPracticeGamePage
             return;
         }
         var game = await _CricketPracticeGamePersistence.Get(code);
-        IsNew = game == null;
-        CricketPracticeGame = game ?? new();
-        if (IsNew)
+        if (game == null)
         {
-            CurrentTarget = CricketPracticeGame.Targets[0];
-            PlayerOnTurn = CricketPracticeGame.Players[0];
+            //TODO: handle game not found
+            return;
         }
-        else
+        CricketPracticeGame = game;
+        int throwCount = CricketPracticeGame.Players.Min(x => x.Throws.Count);
+        if (CricketPracticeGame.Targets.Count == throwCount)
         {
-            int throwCount = CricketPracticeGame.Players.Min(x => x.Throws.Count);
-            if (CricketPracticeGame.Targets.Count == throwCount)
-            {
-                //TODO: handle end of game
-                return;
-            }
-            CurrentTarget = CricketPracticeGame.Targets[throwCount];
-            PlayerOnTurn = CricketPracticeGame.Players.FirstOrDefault(x => x.Throws.Count < throwCount) ??
-                           CricketPracticeGame.Players[0];
+            //TODO: handle end of game
+            return;
         }
+        CurrentTarget = CricketPracticeGame.Targets[throwCount];
+        var users = await _UserPersistence.GetAllUsers();
+        Players = CricketPracticeGame.Players.Select(x => new CricketPracticePlayerPresenter
+        {
+            Throws = x.Throws,
+            UserId = x.UserId,
+            UserName = users.FirstOrDefault(u => u.Id == x.UserId)?.Name ?? "Unknown",
+        }).ToList();
+
+        ResolvePlayerOnTurn(throwCount);
     }
 
+    private void ResolvePlayerOnTurn(int throwCount)
+    {
+        PlayerOnTurnIndex = -1;
+        for (int i = 0; i < CricketPracticeGame.Players.Count; i++)
+        {
+            if (CricketPracticeGame.Players[i].Throws.Count < throwCount)
+            {
+                PlayerOnTurnIndex = i;
+                break;
+            }
+        }
+        if (PlayerOnTurnIndex == -1)
+        {
+            PlayerOnTurnIndex = 0;
+        }
+    }
 }

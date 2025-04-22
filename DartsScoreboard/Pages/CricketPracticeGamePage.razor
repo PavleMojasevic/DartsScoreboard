@@ -8,11 +8,21 @@
             @CurrentTarget
         </div>
     </div>
-    <div class="players">
-        @foreach (var player in CricketPracticeGame.Players)
-        {
-            <div class="player"> 
-            </div>
-        }
+    <div class="players-and-keyboard">
+        <div class="players">
+            @for (int i = 0; i < Players.Count; i++)
+            {
+                <div class="player">
+                    <div class="player-name">
+                        @Players[i].UserName
+                    </div>
+                    <div class="player-score">
+                        @Players[i].Points
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="keyboard-container">
+        </div>
     </div>
 </div>
