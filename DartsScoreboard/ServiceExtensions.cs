@@ -9,5 +9,7 @@ public static class ServiceExtensions
         services.AddTransient<IUserPersistence, UserPersistence>();
         services.AddTransient<ICricketPracticeGamePersistence, CricketPracticeGamePersistence>();
         services.AddSingleton<IIndexedDbFactory, IndexedDbFactory>();
+
+        services.AddSingleton<PlayerSelectionService>();
     }
 }

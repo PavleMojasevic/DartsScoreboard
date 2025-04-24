@@ -1,9 +1,33 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using DartsScoreboard.Models;
+using Microsoft.AspNetCore.Components;
+
 
 namespace DartsScoreboard
 {
     public partial class GamesStandard
     {
+        // Player settings
+        [Inject] PlayerSelectionService PlayerService { get; set; } = default!;
+        [Inject] IUserPersistence UserPersistence { get; set; } = default!;
+        private bool IsFull => PlayerService.SelectedPlayers.Count >= 4;
+        protected override async Task OnInitializedAsync()
+        {
+            await PlayerService.LoadAllUsersAsync();
+        }
+
+        private void OnUserSelected(ChangeEventArgs e)
+        {
+            if (int.TryParse(e.Value?.ToString(), out int id))
+            {
+                var user = PlayerService.AllUsers.FirstOrDefault(x => x.Id == id);
+                if (user != null)
+                {
+                    PlayerService.AddExistingPlayer(user);
+                }
+            }
+        }
+
+        // Game settings
         public int SelectedScore { get; set; } = 501;
         public string SelectedStartWith { get; set; } = "STRAIGHT IN";
         public string SelectedEndWith { get; set; } = "DOUBLE OUT";

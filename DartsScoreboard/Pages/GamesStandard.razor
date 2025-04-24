@@ -7,12 +7,29 @@
 
     <!-- Player Options -->
     <div class="player-options">
-        <h4>Players</h4>
+        <h4>Player settings</h4>
+        <!-- Add Player -->
+        <button class="btn btn-primary mb-2" @onclick="PlayerService.OpenAddPopup" disabled="@IsFull">
+            Add Player
+        </button>
+
+        <!-- Added Players Display -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            @foreach (var player in PlayerService.SelectedPlayers)
+            {
+                <div class="card p-2 d-flex align-items-center" style="width: 130px;">
+                    <div>@player.Name</div>
+                    <button class="btn btn-sm btn-outline-danger mt-2" @onclick="() => PlayerService.RemovePlayer(player)">
+                        Remove
+                    </button>
+                </div>
+            }
+        </div>
     </div>
 
     <!-- Game Options -->
     <div class="game-options">
-        <h4>Game options</h4>
+        <h4>Game settings</h4>
         <!-- Score Options -->
         <div class="form-group mb-3">
             <div class="btn-group" role="group">
@@ -62,3 +79,31 @@
     </div>
 
 </div>
+
+<!-- Pop Up -->
+@if (PlayerService.ShowAddPopup)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <h5>Select player type</h5>
+            <button class="btn btn-outline-primary mb-2" @onclick="PlayerService.ShowExistingPlayerSelection">
+                Existing Player
+            </button>
+            <button class="btn btn-outline-secondary mb-2" @onclick="PlayerService.AddGuestPlayer">
+                Guest Player
+            </button>
+            <button class="btn btn-sm btn-outline-danger" @onclick="PlayerService.CloseAddPopup">Cancel</button>
+
+            @if (PlayerService.ShowUserDropdown)
+            {
+                <select class="form-control mt-2" @onchange="OnUserSelected">
+                    <option disabled selected>Select player</option>
+                    @foreach (var user in PlayerService.AllUsers)
+                    {
+                        <option value="@user.Id">@user.Name</option>
+                    }
+                </select>
+            }
+        </div>
+    </div>
+}
