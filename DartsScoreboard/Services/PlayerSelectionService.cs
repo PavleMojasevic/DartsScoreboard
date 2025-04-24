@@ -69,18 +69,12 @@ public class PlayerSelectionService
         try
         {
             using var db = await _dbFactory.Create<DartsScoreBoardDb>();
-
-            if (!db.Users.Any())
-            {
-                db.Users.Add(new User { Name = "DefaultPlayer" });
-            }
-
-            AllUsers = db.Users.ToList();
+            AllUsers = db.Users.ToList();  // Safe: store is guaranteed to exist
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[IndexedDB] Failed to load users: {ex.Message}");
-            AllUsers = new List<User>(); // fallback to empty list
+            AllUsers = new List<User>(); // fallback
         }
     }
 }

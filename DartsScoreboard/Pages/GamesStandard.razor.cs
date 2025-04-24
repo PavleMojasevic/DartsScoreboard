@@ -7,11 +7,15 @@ namespace DartsScoreboard
     public partial class GamesStandard
     {
         // Player settings
+        [Inject] DbInitializerService DbInit { get; set; } = default!;
         [Inject] PlayerSelectionService PlayerService { get; set; } = default!;
         [Inject] IUserPersistence UserPersistence { get; set; } = default!;
         private bool IsFull => PlayerService.SelectedPlayers.Count >= 4;
         protected override async Task OnInitializedAsync()
         {
+            await DbInit.EnsureStoresCreated();
+
+            // now it is safe to call anything that uses db.Users.ToList() etc.
             await PlayerService.LoadAllUsersAsync();
         }
 
