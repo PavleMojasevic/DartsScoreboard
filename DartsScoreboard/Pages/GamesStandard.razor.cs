@@ -86,7 +86,7 @@ namespace DartsScoreboard
         private void StartGame()
         {
             GameOptionsOutputFunction();
-            NavManager.NavigateTo($"/gameStandardPlay/{Uri.EscapeDataString(GameOptionsOutput)}");
+            NavManager.NavigateTo("/gameStandardPlay");
         }
     }
 }

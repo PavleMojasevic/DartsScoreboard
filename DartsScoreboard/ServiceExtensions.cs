@@ -1,5 +1,4 @@
-﻿using DartsScoreboard;
-using IndexedDB.Blazor;
+﻿using IndexedDB.Blazor;
 
 namespace DartsScoreboard;
 
@@ -10,9 +9,9 @@ public static class ServiceExtensions
         services.AddTransient<IUserPersistence, UserPersistence>();
         services.AddTransient<ICricketPracticeGamePersistence, CricketPracticeGamePersistence>();
         services.AddSingleton<IIndexedDbFactory, IndexedDbFactory>();
+        services.AddTransient<IStandardGamePersistence, StandardGamePersistence>();
 
         services.AddSingleton<DbInitializerService>();
-
         services.AddSingleton<PlayerSelectionService>();
     }
 }

@@ -5,35 +5,26 @@ public class User
     [System.ComponentModel.DataAnnotations.Key]
     public int Id { get; set; }
     public string Name { get; set; }
+    public List<UserStats> Stats { get; set; } = new ();
 }
-public class CricketGame
+
+public class  UserStats
 {
-    [System.ComponentModel.DataAnnotations.Key]
-    public int Id { get; set; }
-    public List<CricketPlayer> Players { get; set; }
-}
-public class CricketPlayer
-{
-    public int Id { get; set; }
-    public int UserId { get; set; }
-    public List<CricketThrow> Throws { get; set; }
-    public List<CricketNumberScore> Scores { get; set; }
-    public int Points { get; set; }
-}
-public class CricketThrow
-{
-    public CricketDartThrow FirstDart { get; set; } = new();
-    public CricketDartThrow SecondDart { get; set; } = new();
-    public CricketDartThrow ThirdDart { get; set; } = new();
-}
-public class CricketDartThrow
-{
-    public bool IsMiss => Number == null;
-    public int? Number { get; set; }
-    public int? Count { get; set; }
-}
-public class CricketNumberScore
-{
-    public int Number { get; set; }
-    public int Count { get; set; }
+    public int ThreeDartAverage { get; set; }
+    public int FirstNineAverage { get; set; }
+    public int CheckoutPercentage { get; set; }
+    public int CheckoutCount { get; set; }
+    public int HighestFinish { get; set; }
+    public int HighestScore { get; set; }
+    public Dictionary<string, int> HighScoreHits { get; set; } = new()
+    {
+        { "180", 0 },
+        { "160+", 0 },
+        { "140+", 0 },
+        { "120+", 0 },
+        { "100+", 0 },
+        { "80+", 0 },
+        { "60+", 0 },
+        { "40+", 0 }
+    };
 }

@@ -1,6 +1,30 @@
 ﻿@namespace DartsScoreboard
-@page "/gameStandardPlay/{GameOptionsOutput}"
+@page "/gameStandardPlay"
 
-<h3>Play Page</h3>
-<p>Game starting score: @DecodedOptions</p>
+@if (WinnerPopup)
+{
+    <div class="winner-popup">
+        <h2>@Players[CurrentPlayerIndex].Name wins! 🏆</h2>
+        <button @onclick="ResetGame">Restart</button>
+    </div>
+}
+else
+{
+    <div class="players">
+        @foreach (var player in Players)
+        {
+            <div class="player-box @(Players[CurrentPlayerIndex].Id == player.Id ? "current-player" : "")">
+                <h3>@player.Name</h3>
+                <p>Score: @PlayerScores[player.Id]</p>
+            </div>
+        }
+    </div>
+
+    <div class="input-display">
+        <h2>Input: @InputScore</h2>
+        <button class="btn btn-success" @onclick="SubmitScore">Submit</button>
+    </div>
+
+    <Keyboard KeyboardParameters="KeyboardParams" KeyClick="HandleKey" />
+}
 

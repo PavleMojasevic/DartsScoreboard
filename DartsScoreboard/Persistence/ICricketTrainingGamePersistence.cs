@@ -1,5 +1,4 @@
-﻿
-namespace DartsScoreboard
+﻿namespace DartsScoreboard
 {
     public interface ICricketPracticeGamePersistence
     {
