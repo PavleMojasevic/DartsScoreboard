@@ -5,15 +5,14 @@ public class User
     [System.ComponentModel.DataAnnotations.Key]
     public int Id { get; set; }
     public string Name { get; set; }
-    public List<UserStats> Stats { get; set; } = new ();
+    public UserStats Stats { get; set; } = new ();
 }
 
-public class  UserStats
+public class UserStats
 {
-    public int ThreeDartAverage { get; set; }
-    public int FirstNineAverage { get; set; }
-    public int CheckoutPercentage { get; set; }
-    public int CheckoutCount { get; set; }
+    public double ThreeDartAverage { get; set; }
+    public double FirstNineAverage { get; set; }
+    public double CheckoutPercentage { get; set; }
     public int HighestFinish { get; set; }
     public int HighestScore { get; set; }
     public Dictionary<string, int> HighScoreHits { get; set; } = new()
