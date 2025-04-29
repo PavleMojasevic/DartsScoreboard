@@ -5,9 +5,20 @@
 {
     <div class="winner-popup">
         <h2>@Players[CurrentPlayerIndex].Name wins! 🏆</h2>
+
         <h3>Player average: @Players[CurrentPlayerIndex].Stats.ThreeDartAverage.ToString("F2")</h3>
-        <h3>Player checkaut [%]: @Players[CurrentPlayerIndex].Stats.CheckoutPercentage.ToString("F2")%</h3>
-        <button @onclick="ResetGame">Restart</button>
+        <h3>Player checkout [%]: @Players[CurrentPlayerIndex].Stats.CheckoutPercentage.ToString("F2")%</h3>
+        <h3>Highest score: @Players[CurrentPlayerIndex].Stats.HighestScore</h3>
+
+        <h3>High Scores Hit:</h3>
+        <ul>
+            @foreach (var hit in Players[CurrentPlayerIndex].Stats.HighScoreHits)
+            {
+                <li>@hit.Key: @hit.Value times</li>
+            }
+        </ul>
+
+        <button class="btn btn-success" @onclick="ResetGame">Restart</button>
     </div>
 }
 else

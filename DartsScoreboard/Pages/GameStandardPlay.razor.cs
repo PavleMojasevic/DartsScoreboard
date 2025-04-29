@@ -19,7 +19,11 @@ namespace DartsScoreboard
         // Checkout list and darts used on a double
         private void OnSelectNumOfDarts(int value) => SelectedNumOfDarts = value;
         private void OnSelectDartsUsedOnCheckout(int value) => SelectedDartsUsedOnCheckout = value;
-        private void CloseCheckoutPopup() => ShowCheckoutPopup = false;
+        private void CloseCheckoutPopup()
+        {
+            ShowCheckoutPopup = false;
+            InputScore = "";
+        }
 
         public int NumOfDoubleDartsThrownAll { get; set; } = 0;
         public int SelectedNumOfDarts { get; set; } = 1;
@@ -44,7 +48,17 @@ namespace DartsScoreboard
         }
         private void HandleKey(KeyboardKey key)
         {
-            InputScore += key.Value;
+            if (key.Value == "DEL")
+            {
+                if (!string.IsNullOrEmpty(InputScore))
+                {
+                    InputScore = InputScore.Substring(0, InputScore.Length - 1);
+                }
+            }
+            else
+            {
+                InputScore += key.Value;
+            }
         }
 
         // Numbers that cannot be finished
@@ -57,7 +71,15 @@ namespace DartsScoreboard
         private void DoubleOutCheckout(int score)
         {
             var currentPlayer = Players[CurrentPlayerIndex];
-            if (NoScore() || !(PlayerScores[currentPlayer.Id][0] != 101 && PlayerScores[currentPlayer.Id][0] != 104 && PlayerScores[currentPlayer.Id][0] != 107 && PlayerScores[currentPlayer.Id][0] != 110))
+
+            if (score > 180 || PlayerScores[currentPlayer.Id][0] - score < 0)
+            {
+                // Invalid score
+                InputScore = "";
+                return;
+            }
+
+            if (NoScore())
             {
                 PlayerScores[currentPlayer.Id][1] += 3;
             }
@@ -73,7 +95,8 @@ namespace DartsScoreboard
                     ShowCheckoutPopup = true;
                 }
             }
-            else if (PlayerScores[currentPlayer.Id][0] > 40 || (PlayerScores[currentPlayer.Id][0] % 2 != 0 && PlayerScores[currentPlayer.Id][0] > 1))
+            else if (PlayerScores[currentPlayer.Id][0] > 40 || (PlayerScores[currentPlayer.Id][0] % 2 != 0 && PlayerScores[currentPlayer.Id][0] > 1) || 
+                !(PlayerScores[currentPlayer.Id][0] != 101 && PlayerScores[currentPlayer.Id][0] != 104 && PlayerScores[currentPlayer.Id][0] != 107 && PlayerScores[currentPlayer.Id][0] != 110))
             {
                 if (PlayerScores[currentPlayer.Id][0] - score == 0)
                 {
@@ -141,7 +164,16 @@ namespace DartsScoreboard
         private void SubmintigScore(int score)
         {
             var currentPlayer = Players[CurrentPlayerIndex];
+
+            if (score > 180 || PlayerScores[currentPlayer.Id][0] - score < 0)
+            {
+                // Invalid score
+                InputScore = "";
+                return;
+            }
+            
             PlayerScores[currentPlayer.Id][0] -= score;
+            UpdateHighScoreHits(currentPlayer, score);
 
             if (PlayerScores[currentPlayer.Id][0] == 0)
             {
@@ -173,13 +205,6 @@ namespace DartsScoreboard
         {
             if (int.TryParse(InputScore, out int score))
             {
-                if (score > 180)
-                {
-                    // Invalid score
-                    InputScore = "";
-                    return;
-                }
-
                 var currentPlayer = Players[CurrentPlayerIndex];
 
                 // Calculating averages
@@ -189,10 +214,18 @@ namespace DartsScoreboard
                 }
                 else
                 {
-                    //TODO: Implement 170 finish logic
+                    if (NoScore())
+                    {
+                        if (PlayerScores[currentPlayer.Id][0] - score == 0)
+                        {
+                            // Invalid score
+                            InputScore = "";
+                            return;
+                        }
+                    }
+
                     DoubleOutCheckout(score);
                 }
-
 
                 if (!ShowCheckoutPopup)
                 {
@@ -209,6 +242,48 @@ namespace DartsScoreboard
             {
                 PlayerScores[player.Id][0] = StartingScore;
                 PlayerScores[player.Id][1] = 0;
+                player.Stats.HighestScore = 0;
+            }
+        }
+
+        private void UpdateHighScoreHits(User currentPlayer, int roundScore)
+        {
+            if (roundScore == 180)
+            {
+                currentPlayer.Stats.HighScoreHits["180"]++;
+            }
+            else if (roundScore >= 160)
+            {
+                currentPlayer.Stats.HighScoreHits["160+"]++;
+            }
+            else if (roundScore >= 140)
+            {
+                currentPlayer.Stats.HighScoreHits["140+"]++;
+            }
+            else if (roundScore >= 120)
+            {
+                currentPlayer.Stats.HighScoreHits["120+"]++;
+            }
+            else if (roundScore >= 100)
+            {
+                currentPlayer.Stats.HighScoreHits["100+"]++;
+            }
+            else if (roundScore >= 80)
+            {
+                currentPlayer.Stats.HighScoreHits["80+"]++;
+            }
+            else if (roundScore >= 60)
+            {
+                currentPlayer.Stats.HighScoreHits["60+"]++;
+            }
+            else if (roundScore >= 40)
+            {
+                currentPlayer.Stats.HighScoreHits["40+"]++;
+            }
+
+            if (currentPlayer.Stats.HighestScore < roundScore)
+            {
+                currentPlayer.Stats.HighestScore = roundScore;
             }
         }
 
@@ -234,9 +309,10 @@ namespace DartsScoreboard
                     new() { Text = "8", Value = "8" },
                     new() { Text = "9", Value = "9" }
                 },
-                new List<KeyboardKey> 
+                new List<KeyboardKey>
                 {
-                    new() { Text = "0", Value = "0" }
+                    new() { Text = "0", Value = "0" },
+                    new() { Text = "Del", Value = "DEL" }  // Delete button
                 }
             }
         };
