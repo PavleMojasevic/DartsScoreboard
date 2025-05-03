@@ -4,21 +4,35 @@
 @if (WinnerPopup)
 {
     <div class="winner-popup">
-        <h2>@Players[CurrentPlayerIndex].Name wins! 🏆</h2>
+        <h2>Game Over 🏁</h2>
 
-        <h3>Player average: @Players[CurrentPlayerIndex].Stats.ThreeDartAverage.ToString("F2")</h3>
-        <h3>Player checkout [%]: @Players[CurrentPlayerIndex].Stats.CheckoutPercentage.ToString("F2")%</h3>
-        <h3>Highest score: @Players[CurrentPlayerIndex].Stats.HighestScore</h3>
+        <h3 class="mb-3">Final Player Statistics</h3>
 
-        <h3>High Scores Hit:</h3>
-        <ul>
-            @foreach (var hit in Players[CurrentPlayerIndex].Stats.HighScoreHits)
-            {
-                <li>@hit.Key: @hit.Value times</li>
-            }
-        </ul>
+        @foreach (var player in Players)
+        {
+            <div class="card p-3 mb-3">
+                <h4>@player.Name @(player.Id == Players[CurrentPlayerIndex].Id ? "(Winner 🏆)" : "")</h4>
+                <p>Three-Dart Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
+                <p>Checkout Percentage: @player.Stats.CheckoutPercentage.ToString("F2")%</p>
+                <p>Highest Score: @player.Stats.HighestScore</p>
 
-        <button class="btn btn-success" @onclick="ResetGame">Restart</button>
+                <h5>High Scores Hit:</h5>
+                <ul>
+                    @foreach (var hit in player.Stats.HighScoreHits)
+                    {
+                        @if (hit.Value > 0)
+                        {
+                            <li>@hit.Key: @hit.Value times</li>
+                        }
+                    }
+                </ul>
+            </div>
+        }
+
+        <div class="mt-4">
+            <button class="btn btn-success me-2" @onclick="ResetGame">Restart Game</button>
+            <button class="btn btn-outline-secondary" @onclick="GoHome">Home</button>
+        </div>
     </div>
 }
 else
@@ -29,6 +43,7 @@ else
             <div class="player-box @(Players[CurrentPlayerIndex].Id == player.Id ? "current-player" : "")">
                 <h3>@player.Name</h3>
                 <p>Score: @PlayerScores[player.Id][0]</p>
+                <p>Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
             </div>
         }
     </div>
@@ -64,8 +79,8 @@ else
                     {
                         var option = AvailableDoubleDartOptions[i];
                         <button type="button"
-                                class="btn @(SelectedNumOfDarts == option ? "btn-primary" : "btn-outline-primary")"
-                                @onclick="() => OnSelectNumOfDarts(option)">
+                                class="btn @(SelectedDartsUsedOnDouble == option ? "btn-primary" : "btn-outline-primary")"
+                                @onclick="() => OnSelectDartsUsedOnDouble(option)">
                             @option
                         </button>
                     }
