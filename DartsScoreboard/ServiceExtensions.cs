@@ -1,4 +1,5 @@
-﻿using IndexedDB.Blazor;
+﻿using DartsScoreboard.Services;
+using IndexedDB.Blazor;
 
 namespace DartsScoreboard;
 
@@ -12,6 +13,7 @@ public static class ServiceExtensions
         services.AddTransient<IStandardGamePersistence, StandardGamePersistence>();
 
         services.AddSingleton<DbInitializerService>();
+        services.AddSingleton<GameSettingsService>();
         services.AddSingleton<PlayerSelectionService>();
     }
 }

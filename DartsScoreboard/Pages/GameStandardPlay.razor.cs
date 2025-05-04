@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using DartsScoreboard.Services;
+using Microsoft.AspNetCore.Components;
 using System.Xml.Serialization;
 
 namespace DartsScoreboard
@@ -8,13 +9,17 @@ namespace DartsScoreboard
         [Inject] public PlayerSelectionService PlayerService { get; set; } = default!;
         [Inject] public IStandardGamePersistence _StandardGamePersistence { get; set; }
         [Inject] public IUserPersistence _UserPersistence { get; set; }
+        [Inject] public GameSettingsService GameSettings { get; set; } = default!;
         public List<User> Players { get; set; } = new();
         public Dictionary<int, Dictionary<int, int>> PlayerScores { get; set; } = new(); // <user.Id, <PlayerScore, PlayerThrows>>
         public int CurrentPlayerIndex { get; set; } = 0;
         public string InputScore { get; set; } = "";
         public bool WinnerPopup { get; set; } = false;
 
-        public int StartingScore = 501; // TODO: Add value from last page
+        // Default game settings
+        public int StartingScore = 501;
+        public string StartingIn = "STRAIGHT IN";
+        public string StartingOut = "DOUBLE OUT";
 
         // Creating undo stack
         public Stack<(int, int, int)> undoStack = new Stack<(int, int, int)>();
@@ -37,6 +42,10 @@ namespace DartsScoreboard
 
         protected override void OnInitialized()
         {
+            StartingScore = GameSettings.StartingScore;
+            StartingIn = GameSettings.StartInOption;
+            StartingOut = GameSettings.EndInOption;
+
             Players = PlayerService.SelectedPlayers;
 
             foreach (var player in Players)
@@ -46,8 +55,6 @@ namespace DartsScoreboard
                     { 0, StartingScore }, // 0 = score
                     { 1, 0 }              // 1 = throws
                 };
-
-                // Players[player.Id].Stats.ThreeDartAverage = 0;
             }
         }
         private void HandleKey(KeyboardKey key)
@@ -193,7 +200,7 @@ namespace DartsScoreboard
                 var currentPlayer = Players[CurrentPlayerIndex];
 
                 // Calculating averages
-                if (PlayerScores[currentPlayer.Id][0] > 170)
+                if (PlayerScores[currentPlayer.Id][0] > 170 || StartingOut != "DOUBLE OUT")
                 {
                     PlayerScores[currentPlayer.Id][1] += 3;
                     // Stats
