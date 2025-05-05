@@ -36,6 +36,8 @@ namespace DartsScoreboard
         public int SelectedScore { get; set; } = 501;
         public string SelectedStartWith { get; set; } = "STRAIGHT IN";
         public string SelectedEndWith { get; set; } = "DOUBLE OUT";
+        public int SelectedNumOfLegs { get; set; } = 1;
+        public int SelectedNumOfSets { get; set; } = 1;
 
         public List<int> StartingScoreOptions { get; set; } = new() { 301, 501, 701 };
         public List<string> StartingOptions { get; set; } = new() { "STRAIGHT IN", "DOUBLE IN", "MASTER IN" };
@@ -58,7 +60,7 @@ namespace DartsScoreboard
         [Inject] public GameSettingsService GameSettings { get; set; } = default!;
         private void StartGame()
         {
-            GameSettings.SetGameOptions(SelectedScore, SelectedStartWith, SelectedEndWith);
+            GameSettings.SetGameOptions(SelectedScore, SelectedStartWith, SelectedEndWith, SelectedNumOfLegs, SelectedNumOfSets);
             NavManager.NavigateTo("/gameStandardPlay");
         }
     }
