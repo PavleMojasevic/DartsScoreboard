@@ -15,18 +15,22 @@ public class CricketPracticeGame
 public class CricketPracticeGamePlayer
 {
     public int Id { get; set; }
-    public int UserId { get; set; }
+    public int? UserId { get; set; }
+    public string? GuestName { get; set; }
     public List<CricketPracticeGamePlayerThrow> Throws { get; set; } = new();
     public int Points => Throws.Sum(x => x.Total);
 }
 public class CricketPracticeGamePlayerThrow
 {
-    public int Number { get; set; }
-    public int FirstDart { get; set; }
-    public int SecondDart { get; set; }
-    public int ThirdDart { get; set; }
+    public string Number { get; set; }
+    public int FirstDart { get; set; } = -1;
+    public int SecondDart { get; set; } = -1;
+    public int ThirdDart { get; set; } = -1;
     public int Bonus => CalculateBonus();
-    public int Total => FirstDart + SecondDart + ThirdDart + Bonus;
+    public int Total => FirstDart +
+                        (SecondDart == -1 ? 0 : SecondDart) +
+                        (ThirdDart == -1 ? 0 : ThirdDart) +
+                        (ThirdDart == -1 ? 0 : Bonus);
     public int CalculateBonus()
     {
         int bonus = 0;
@@ -39,5 +43,13 @@ public class CricketPracticeGamePlayerThrow
         if (total >= 3)
             bonus++;
         return bonus;
+    }
+    public override string ToString()
+    {
+        if (SecondDart == -1)
+            return FirstDart.ToString();
+        if (ThirdDart == -1)
+            return $"{FirstDart} + {SecondDart}";
+        return $"{FirstDart} + {SecondDart} + {ThirdDart}{(Bonus != 0 ? $" + ({Bonus})" : "")}";
     }
 }

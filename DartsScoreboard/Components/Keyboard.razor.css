@@ -17,10 +17,9 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #ddd;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: calc(1rem + 0.5vw); /* Adjust font size relative to key size */
+    background-color: transparent;
+    border: 2px solid #ccc;
+    border-radius: 4px; 
     text-align: center;
     overflow: hidden; /* Prevent text overflow */
 }

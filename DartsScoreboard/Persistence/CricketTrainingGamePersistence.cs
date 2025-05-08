@@ -10,10 +10,18 @@ public class CricketPracticeGamePersistence : ICricketPracticeGamePersistence
     {
         _DbFactory = dbFactory;
     }
-    public async Task Add(CricketPracticeGame entity)
+    public async Task AddOrUpdate(CricketPracticeGame entity)
     {
         using var db = await _DbFactory.Create<DartsScoreBoardDb>();
-        db.CricketPracticeGames.Add(entity);
+
+        var existingEntity = db.CricketPracticeGames.FirstOrDefault(x => x.Code == entity.Code);
+        if (existingEntity == null)
+            db.CricketPracticeGames.Add(entity);
+        else
+        {
+            existingEntity.Targets = entity.Targets;
+            existingEntity.Players = entity.Players;
+        }
         await db.SaveChanges();
     }
     public async Task Remove(string code)

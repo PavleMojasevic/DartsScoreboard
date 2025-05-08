@@ -6,7 +6,7 @@ namespace DartsScoreboard
     public partial class Games
     {
         [Inject] public NavigationManager navManager { get; set; } = default!;
-        [Inject] public ICricketPracticeGamePersistence _CricketPracticeGamePersistence { get; set; } = default!;
+        [Inject] public ICricketPracticeGamePersistence _CricketPracticeGamePersistence { get; set; }
         [Inject] public IUserPersistence _UserPersistence { get; set; } = default!;
         private void Standard()
         {
@@ -21,7 +21,7 @@ namespace DartsScoreboard
                 await _UserPersistence.AddUser(user);
             }
             string code = Guid.NewGuid().ToString();
-            await _CricketPracticeGamePersistence.Add(
+            await _CricketPracticeGamePersistence.AddOrUpdate(
                  new CricketPracticeGame
                  {
                      Code = code,
