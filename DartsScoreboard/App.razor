@@ -9,4 +9,12 @@
             <p role="alert">Sorry, there's nothing at this address.</p>
         </LayoutView>
     </NotFound>
-</Router> 
+</Router>
+@code
+{
+    [Inject] DbInitializerService DbInit { get; set; } = default!;
+    protected override async Task OnInitializedAsync()
+    {
+        await DbInit.EnsureStoresCreated();
+    }
+}

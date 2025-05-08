@@ -14,6 +14,6 @@ public static class ServiceExtensions
 
         services.AddSingleton<DbInitializerService>();
         services.AddSingleton<GameSettingsService>();
-        services.AddSingleton<PlayerSelectionService>();
+        services.AddTransient<PlayerSelectionService>();
     }
 }

@@ -12,30 +12,13 @@ namespace DartsScoreboard
         {
             navManager.NavigateTo("/gamesStandard");
         }
+        private async Task Back()
+        {
+            navManager.NavigateTo("/");
+        }
         private async Task CricketPractice()
         {
-            var user = await _UserPersistence.GetUser(1);
-            if (user == null)
-            {
-                user = new User { Id = 1, Name = "Test User" };
-                await _UserPersistence.AddUser(user);
-            }
-            string code = Guid.NewGuid().ToString();
-            await _CricketPracticeGamePersistence.AddOrUpdate(
-                 new CricketPracticeGame
-                 {
-                     Code = code,
-                     Players = new List<CricketPracticeGamePlayer>
-                     {
-                        new CricketPracticeGamePlayer
-                        {
-                            Id = 1,
-                            UserId = 1,
-                            Throws=new()
-                        }
-                     }
-                 });
-            navManager.NavigateTo("/cricket-practice/" + code);
+            navManager.NavigateTo("/cricket-practice-setup");
         }
     }
 }
