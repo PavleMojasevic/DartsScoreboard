@@ -1,5 +1,6 @@
 ﻿using DartsScoreboard.Services;
 using Microsoft.AspNetCore.Components;
+using System.Numerics;
 using System.Xml.Serialization;
 
 namespace DartsScoreboard
@@ -10,6 +11,7 @@ namespace DartsScoreboard
         public int PlayerThrows { get; set; }
         public int PlayerSets { get; set; }
         public int PlayerLegs { get; set; }
+        public int PlayerCollectedScore { get; set; }
     }
     public class RoundSnapshot
     {
@@ -24,10 +26,24 @@ namespace DartsScoreboard
         [Inject] public IStandardGamePersistence _StandardGamePersistence { get; set; }
         [Inject] public IUserPersistence _UserPersistence { get; set; }
         [Inject] public GameSettingsService GameSettings { get; set; } = default!;
+
+        // Player info
         public List<User> Players { get; set; } = new();
         public Dictionary<int, PlayerScoreInfo> PlayerScores { get; set; } = new();
         public int CurrentPlayerIndex { get; set; } = 0;
+
+        // Input scores
         public string InputScore { get; set; } = "";
+        public string InputScoreDartOne { get; set; } = "";
+        public string InputScoreDartTwo { get; set; } = "";
+        public string InputScoreDartThree { get; set; } = "";
+        public int DartIndex { get; set; } = 1; // 1 = first, 2 = second, 3 = third
+
+        // Keyboard selection
+        public bool UseThreeDartMode { get; set; } = false;
+        public string SelectedMultiplier { get; set; } = "S"; // "S", "D", or "T"
+
+        // Winner popup
         public bool WinnerPopup { get; set; } = false;
 
         // Player rotation
@@ -69,6 +85,8 @@ namespace DartsScoreboard
             StartingScore = GameSettings.StartingScore;
             StartingIn = GameSettings.StartInOption;
             StartingOut = GameSettings.EndInOption;
+            NumOfLegs = GameSettings.Legs;
+            NumOfSets = GameSettings.Sets;
 
             Players = PlayerService.SelectedPlayers;
 
@@ -79,27 +97,9 @@ namespace DartsScoreboard
                     PlayerScore = StartingScore,
                     PlayerThrows = 0,
                     PlayerSets = 0,
-                    PlayerLegs = 0
+                    PlayerLegs = 0,
+                    PlayerCollectedScore = 0
                 };
-            }
-        }
-        private void HandleKey(KeyboardKey key)
-        {
-            if (key.Value == "DEL")
-            {
-                if (!string.IsNullOrEmpty(InputScore))
-                {
-                    InputScore = InputScore.Substring(0, InputScore.Length - 1);
-                }
-            }
-            else if (key.Value == "UNDO")
-            {
-                UndoMove();
-                InputScore = "";
-            }
-            else
-            {
-                InputScore += key.Value;
             }
         }
 
@@ -107,6 +107,16 @@ namespace DartsScoreboard
         private void GoHome()
         {
             NavManager.NavigateTo("/");
+        }
+
+        private int CombineScore()
+        {
+            int dartOne = int.TryParse(InputScoreDartOne, out int dartOneValue) ? dartOneValue : 0;
+            int dartTwo = int.TryParse(InputScoreDartTwo, out int dartTwoValue) ? dartTwoValue : 0;
+            int dartThree = int.TryParse(InputScoreDartThree, out int dartThreeValue) ? dartThreeValue : 0;
+            int totalScore = dartOne + dartTwo + dartThree;
+
+            return totalScore;
         }
 
         // Numbers that cannot be finished
@@ -149,7 +159,21 @@ namespace DartsScoreboard
                 if (PlayerScores[currentPlayer.Id].PlayerScore - score == 0)
                 {
                     AvailableDoubleDartOptions = new List<int> { 1, 2 };
-                    AvailableCheckoutDartOptions = new List<int> { 2, 3 };
+                    if (UseThreeDartMode)
+                    {
+                        if (InputScoreDartThree != "")
+                        {
+                            PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                        }
+                        else
+                        {
+                            PlayerScores[currentPlayer.Id].PlayerThrows += 2;
+                        }
+                    }
+                    else
+                    { 
+                        AvailableCheckoutDartOptions = new List<int> { 2, 3 };      // TODO: Add eachDart keyboard options
+                    }
                     ShowCheckoutPopup = true;
                 }
                 else if (PlayerScores[currentPlayer.Id].PlayerScore - score > 50)
@@ -170,7 +194,25 @@ namespace DartsScoreboard
                 if (PlayerScores[currentPlayer.Id].PlayerScore - score == 0)
                 {
                     AvailableDoubleDartOptions = new List<int> { 1, 2, 3 };
-                    AvailableCheckoutDartOptions = new List<int> { 1, 2, 3 };
+                    if (UseThreeDartMode)
+                    {
+                        if (InputScoreDartThree != "")
+                        {
+                            PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                        }
+                        else if (InputScoreDartTwo != "")
+                        {
+                            PlayerScores[currentPlayer.Id].PlayerThrows += 2;
+                        }
+                        else
+                        {
+                            PlayerScores[currentPlayer.Id].PlayerThrows += 1;
+                        }
+                    }
+                    else
+                    {
+                        AvailableCheckoutDartOptions = new List<int> { 1, 2, 3 };    // TODO: Add eachDart keyboard options
+                    }
                     ShowCheckoutPopup = true;
                 }
                 else if (PlayerScores[currentPlayer.Id].PlayerScore - score > 1)
@@ -189,14 +231,13 @@ namespace DartsScoreboard
             }
 
             // Stats
-            if (StartingScore - PlayerScores[currentPlayer.Id].PlayerScore != 0)
-            {
-                currentPlayer.Stats.ThreeDartAverage = (double)((StartingScore - PlayerScores[currentPlayer.Id].PlayerScore) / ((double)PlayerScores[currentPlayer.Id].PlayerThrows / 3));
-                if (currentPlayer.Stats.NumOfDoublesThrown > 0)
-                    currentPlayer.Stats.CheckoutPercentage = (1 / (double)currentPlayer.Stats.NumOfDoublesThrown) * 100;
-                else
-                    currentPlayer.Stats.CheckoutPercentage = 0;
-            }
+            PlayerScores[currentPlayer.Id].PlayerCollectedScore += score;
+            currentPlayer.Stats.ThreeDartAverage = (double)(PlayerScores[currentPlayer.Id].PlayerCollectedScore / ((double)PlayerScores[currentPlayer.Id].PlayerThrows / 3));
+            if (currentPlayer.Stats.NumOfDoublesThrown > 0)
+                currentPlayer.Stats.CheckoutPercentage = ((PlayerScores[currentPlayer.Id].PlayerLegs + (NumOfSets * NumOfLegs)) / (double)currentPlayer.Stats.NumOfDoublesThrown) * 100;
+            else
+                currentPlayer.Stats.CheckoutPercentage = 0;
+            
 
         }
         private void ConfirmCheckoutData()
@@ -224,6 +265,11 @@ namespace DartsScoreboard
         }
         private void SubmitScore()
         {
+            if (true) // TODO: Check witch keyboard is used
+            {
+                InputScore = CombineScore().ToString();
+            }
+
             if (int.TryParse(InputScore, out int score))
             {
                 var currentPlayer = Players[CurrentPlayerIndex];
@@ -260,15 +306,12 @@ namespace DartsScoreboard
                 {
                     PlayerScores[currentPlayer.Id].PlayerThrows += 3;
                     // Stats
-                    if (StartingScore - PlayerScores[currentPlayer.Id].PlayerScore != 0)
-                    {
-                        currentPlayer.Stats.ThreeDartAverage = (double)((StartingScore - PlayerScores[currentPlayer.Id].PlayerScore) / ((double)PlayerScores[currentPlayer.Id].PlayerThrows / 3));
-                        if (currentPlayer.Stats.NumOfDoublesThrown > 0)
-                            currentPlayer.Stats.CheckoutPercentage = (1 / (double)currentPlayer.Stats.NumOfDoublesThrown) * 100;
-                        else
-                            currentPlayer.Stats.CheckoutPercentage = 0;
-                    }
-
+                    PlayerScores[currentPlayer.Id].PlayerCollectedScore += score;
+                    currentPlayer.Stats.ThreeDartAverage = (double)(PlayerScores[currentPlayer.Id].PlayerCollectedScore / ((double)PlayerScores[currentPlayer.Id].PlayerThrows / 3));
+                    if (currentPlayer.Stats.NumOfDoublesThrown > 0)
+                        currentPlayer.Stats.CheckoutPercentage = ((PlayerScores[currentPlayer.Id].PlayerLegs + (NumOfSets * NumOfLegs)) / (double)currentPlayer.Stats.NumOfDoublesThrown) * 100;
+                    else
+                        currentPlayer.Stats.CheckoutPercentage = 0;
                 }
                 else
                 {
@@ -293,6 +336,8 @@ namespace DartsScoreboard
         }
         private void SubmintigScore(int score)
         {
+            DartIndex = 1; // wrap around or submit here
+
             var currentPlayer = Players[CurrentPlayerIndex];
 
             if (score > 180 || PlayerScores[currentPlayer.Id].PlayerScore - score < 0)
@@ -306,29 +351,19 @@ namespace DartsScoreboard
             UpdateHighScoreHits(currentPlayer, score);
 
             // Loading other player scores
-            if (StartingScore - PlayerScores[currentPlayer.Id].PlayerScore != 0)
+            foreach (var player in Players)
             {
-                foreach (var player in Players)
-                {
-                    player.Stats.ThreeDartAverage = (double)((StartingScore - PlayerScores[player.Id].PlayerScore) / ((double)PlayerScores[player.Id].PlayerThrows / 3));
+                player.Stats.ThreeDartAverage = (double)(PlayerScores[player.Id].PlayerCollectedScore / ((double)PlayerScores[player.Id].PlayerThrows / 3));
 
-                    if (player.Stats.NumOfDoublesThrown > 0)
-                        player.Stats.CheckoutPercentage = (1 / (double)player.Stats.NumOfDoublesThrown) * 100;
-                    else
-                        player.Stats.CheckoutPercentage = 0;
-                }
+                if (player.Stats.NumOfDoublesThrown > 0)
+                    player.Stats.CheckoutPercentage = ((PlayerScores[player.Id].PlayerLegs + (NumOfSets * NumOfLegs))/ (double)player.Stats.NumOfDoublesThrown) * 100;
+                else
+                    player.Stats.CheckoutPercentage = 0;
             }
 
             if (PlayerScores[currentPlayer.Id].PlayerScore == 0)
             {
-                // Winner player stats
-                currentPlayer.Stats.ThreeDartAverage = (double)((StartingScore - PlayerScores[currentPlayer.Id].PlayerScore) / ((double)PlayerScores[currentPlayer.Id].PlayerThrows / 3));
-                if (currentPlayer.Stats.NumOfDoublesThrown > 0)
-                    currentPlayer.Stats.CheckoutPercentage = (1 / (double)currentPlayer.Stats.NumOfDoublesThrown) * 100;
-                else
-                    currentPlayer.Stats.CheckoutPercentage = 0;
-                
-                if (PlayerScores[currentPlayer.Id].PlayerLegs == NumOfLegs)
+                if (PlayerScores[currentPlayer.Id].PlayerLegs + 1 == NumOfLegs)
                 {
                     PlayerScores[currentPlayer.Id].PlayerSets++;
                     foreach (var players in Players)
@@ -378,6 +413,9 @@ namespace DartsScoreboard
             }
 
             InputScore = "";
+            InputScoreDartOne = "";
+            InputScoreDartTwo = "";
+            InputScoreDartThree = "";
         }
 
         private void UndoMove()
@@ -466,6 +504,99 @@ namespace DartsScoreboard
             }
         }
 
+
+        private void HandleKey(KeyboardKey key)
+        {
+            if (key.Value == "DEL")
+            {
+                if (!string.IsNullOrEmpty(InputScore))
+                {
+                    InputScore = InputScore.Substring(0, InputScore.Length - 1);
+                }
+            }
+            else if (key.Value == "UNDO")
+            {
+                UndoMove();
+                InputScore = "";
+            }
+            else
+            {
+                InputScore += key.Value;
+            }
+        }
+
+        private void HandleKeyEachDart(KeyboardKey key)
+        {
+            if (key.Value == "DEL")
+            {
+                switch (DartIndex)
+                {
+                    case 1:
+                        InputScoreDartOne = "";
+                        break;
+
+                    case 2:
+                        if (!string.IsNullOrEmpty(InputScoreDartTwo))
+                        {
+                            InputScoreDartTwo = "";
+                        }
+                        else
+                        {
+                            DartIndex = 1;
+                            InputScoreDartOne = "";
+                        }
+                        break;
+
+                    case 3:
+                        if (!string.IsNullOrEmpty(InputScoreDartThree))
+                        {
+                            InputScoreDartThree = "";
+                        }
+                        else
+                        {
+                            DartIndex = 2;
+                            InputScoreDartTwo = "";
+                        }
+                        break;
+                }
+            }
+            else if (key.Value == "UNDO")
+            {
+                UndoMove();
+                InputScoreDartOne = InputScoreDartTwo = InputScoreDartThree = "";
+                DartIndex = 1;
+            }
+            else
+            {
+                if (key.Value == "MISS")
+                {
+                    ApplyDart("0");
+                }
+                else
+                {
+                    ApplyDart(key.Value);
+                }
+            }
+        }
+        private void ApplyDart(string value)
+        {
+            switch (DartIndex)
+            {
+                case 1:
+                    InputScoreDartOne = value;
+                    DartIndex = 2;
+                    break;
+                case 2:
+                    InputScoreDartTwo = value;
+                    DartIndex = 3;
+                    break;
+                case 3:
+                    InputScoreDartThree = value;
+                    // DartIndex = 1; // wrap around or submit here
+                    break;
+            }
+        }
+
         public KeyboardParameters KeyboardParams = new()
         {
             KeyboardKeys = new List<List<KeyboardKey>>
@@ -493,6 +624,141 @@ namespace DartsScoreboard
                     new() { Text = "Undo", Value = "UNDO" },
                     new() { Text = "0", Value = "0" },
                     new() { Text = "Del", Value = "DEL" }  // Delete button
+                }
+            }
+        };
+
+        public KeyboardParameters KeyboardParamsEachDartSingle = new()
+        {
+            KeyboardKeys = new List<List<KeyboardKey>>
+            {
+                new List<KeyboardKey>
+                {
+                    new() { Text = "1", Value = "1" },
+                    new() { Text = "2", Value = "2" },
+                    new() { Text = "3", Value = "3" },
+                    new() { Text = "4", Value = "4" },
+                    new() { Text = "5", Value = "5" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "6", Value = "6" },
+                    new() { Text = "7", Value = "7" },
+                    new() { Text = "8", Value = "8" },
+                    new() { Text = "9", Value = "9" },
+                    new() { Text = "10", Value = "10" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "11", Value = "11" },
+                    new() { Text = "12", Value = "12" },
+                    new() { Text = "13", Value = "13" },
+                    new() { Text = "14", Value = "14" },
+                    new() { Text = "15", Value = "15" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "16", Value = "16" },
+                    new() { Text = "17", Value = "17" },
+                    new() { Text = "18", Value = "18" },
+                    new() { Text = "19", Value = "19" },
+                    new() { Text = "20", Value = "20" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "Undo", Value = "UNDO" },
+                    new() { Text = "Bull(25)", Value = "25" },
+                    new() { Text = "Miss", Value = "MISS" },
+                    new() { Text = "Del", Value = "DEL" }
+                }
+            }
+        };
+        public KeyboardParameters KeyboardParamsEachDartDouble = new()
+        {
+            KeyboardKeys = new List<List<KeyboardKey>>
+            {
+                new List<KeyboardKey>
+                {
+                    new() { Text = "2", Value = "2" },
+                    new() { Text = "4", Value = "4" },
+                    new() { Text = "6", Value = "6" },
+                    new() { Text = "8", Value = "8" },
+                    new() { Text = "10", Value = "10" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "12", Value = "12" },
+                    new() { Text = "14", Value = "14" },
+                    new() { Text = "16", Value = "16" },
+                    new() { Text = "18", Value = "18" },
+                    new() { Text = "20", Value = "20" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "22", Value = "22" },
+                    new() { Text = "24", Value = "24" },
+                    new() { Text = "26", Value = "26" },
+                    new() { Text = "28", Value = "28" },
+                    new() { Text = "30", Value = "30" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "32", Value = "32" },
+                    new() { Text = "34", Value = "34" },
+                    new() { Text = "36", Value = "36" },
+                    new() { Text = "38", Value = "38" },
+                    new() { Text = "40", Value = "40" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "Undo", Value = "UNDO" },
+                    new() { Text = "Bull(50)", Value = "50" },
+                    new() { Text = "Miss", Value = "MISS" },
+                    new() { Text = "Del", Value = "DEL" }
+                }
+            }
+        };
+        public KeyboardParameters KeyboardParamsEachDartTriple = new()
+        {
+            KeyboardKeys = new List<List<KeyboardKey>>
+            {
+                new List<KeyboardKey>
+                {
+                    new() { Text = "3", Value = "3" },
+                    new() { Text = "6", Value = "6" },
+                    new() { Text = "9", Value = "9" },
+                    new() { Text = "12", Value = "12" },
+                    new() { Text = "15", Value = "15" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "18", Value = "18" },
+                    new() { Text = "21", Value = "21" },
+                    new() { Text = "24", Value = "24" },
+                    new() { Text = "27", Value = "27" },
+                    new() { Text = "30", Value = "30" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "33", Value = "33" },
+                    new() { Text = "36", Value = "36" },
+                    new() { Text = "39", Value = "39" },
+                    new() { Text = "42", Value = "42" },
+                    new() { Text = "45", Value = "45" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "48", Value = "48" },
+                    new() { Text = "51", Value = "51" },
+                    new() { Text = "54", Value = "54" },
+                    new() { Text = "57", Value = "57" },
+                    new() { Text = "60", Value = "60" }
+                },
+                new List<KeyboardKey>
+                {
+                    new() { Text = "Undo", Value = "UNDO" },
+                    new() { Text = "Miss", Value = "MISS" },
+                    new() { Text = "Del", Value = "DEL" }
                 }
             }
         };

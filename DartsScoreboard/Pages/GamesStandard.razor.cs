@@ -60,6 +60,12 @@ namespace DartsScoreboard
         [Inject] public GameSettingsService GameSettings { get; set; } = default!;
         private void StartGame()
         {
+            if (PlayerService.SelectedPlayers == null || PlayerService.SelectedPlayers.Count == 0)
+            {
+                // Optionally, show a message or toast here
+                return;
+            }
+
             GameSettings.SetGameOptions(SelectedScore, SelectedStartWith, SelectedEndWith, SelectedNumOfLegs, SelectedNumOfSets);
             NavManager.NavigateTo("/gameStandardPlay");
         }

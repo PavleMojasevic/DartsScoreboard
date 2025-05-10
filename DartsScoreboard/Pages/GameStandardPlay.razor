@@ -4,7 +4,7 @@
 @if (WinnerPopup)
 {
     <div class="winner-popup">
-        <h2>Game Over 🏁</h2>
+        <h2>Game Over 🏋️</h2>
 
         <h3 class="mb-3">Final Player Statistics</h3>
 
@@ -54,35 +54,77 @@ else
     </div>
 
     <div class="input-area">
-        <div class="input-display">
-            <h2>Input: @InputScore</h2>
+        <!-- Mode Switch -->
+        <div class="btn-group mb-3" role="group">
+            <button class="btn @(UseThreeDartMode ? "btn-outline-secondary" : "btn-primary")" @onclick="() => UseThreeDartMode = false">Regular</button>
+            <button class="btn @(UseThreeDartMode ? "btn-primary" : "btn-outline-secondary")" @onclick="() => UseThreeDartMode = true">3 Darts</button>
+        </div>
+
+        @if (UseThreeDartMode)
+        {
+            <!-- Multiplier Mode Switch -->
+            <div class="btn-group mb-3" role="group">
+                <button class="btn @(SelectedMultiplier == "S" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "S"'>Single</button>
+                <button class="btn @(SelectedMultiplier == "D" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "D"'>Double</button>
+                <button class="btn @(SelectedMultiplier == "T" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "T"'>Triple</button>
+            </div>
+
+            <!-- Dart Input Squares -->
+            <div class="d-flex justify-content-center mb-2">
+                <div class="dart-input @(DartIndex == 1 ? "active" : "")">@InputScoreDartOne</div>
+                <div class="dart-input @(DartIndex == 2 ? "active" : "")">@InputScoreDartTwo</div>
+                <div class="dart-input @(DartIndex == 3 ? "active" : "")">@InputScoreDartThree</div>
+            </div>
+
+            <!-- Keyboard -->
+            @switch (SelectedMultiplier)
+            {
+                case "D":
+                    <Keyboard KeyboardParameters="KeyboardParamsEachDartDouble" KeyClick="HandleKeyEachDart" />
+                    break;
+                case "T":
+                    <Keyboard KeyboardParameters="KeyboardParamsEachDartTriple" KeyClick="HandleKeyEachDart" />
+                    break;
+                default:
+                    <Keyboard KeyboardParameters="KeyboardParamsEachDartSingle" KeyClick="HandleKeyEachDart" />
+                    break;
+            }
+
+            <div class="submit-button mt-2">
+                <button class="btn btn-success" @onclick="SubmitScore">Submit</button>
+            </div>
+        }
+        else
+        {
+            <!-- Regular Input Mode -->
+            <div class="input-display text-center mb-2">
+                <h2>Input: @InputScore</h2>
+            </div>
 
             <div class="submit-button">
                 <button class="btn btn-success" @onclick="SubmitScore">
                     Submit
                 </button>
             </div>
-        </div>
 
-        <div class="keyboard-container">
-            <Keyboard KeyboardParameters="KeyboardParams" KeyClick="HandleKey" />
-        </div>
+            <div class="keyboard-container">
+                <Keyboard KeyboardParameters="KeyboardParams" KeyClick="HandleKey" />
+            </div>
+        }
     </div>
 }
+
 @if (ShowCheckoutPopup)
 {
     <div class="modal-overlay">
         <div class="modal-box">
-
             <h4>Checkout Information</h4>
 
-            <!-- Darts at double -->
             <div class="mb-2">
                 <label>Number of darts thrown at double:</label>
                 <div class="btn-group mt-1" role="group">
-                    @for (int i = 0; i < AvailableDoubleDartOptions.Count; i++)
+                    @foreach (var option in AvailableDoubleDartOptions)
                     {
-                        var option = AvailableDoubleDartOptions[i];
                         <button type="button"
                                 class="btn @(SelectedDartsUsedOnDouble == option ? "btn-primary" : "btn-outline-primary")"
                                 @onclick="() => OnSelectDartsUsedOnDouble(option)">
@@ -92,15 +134,13 @@ else
                 </div>
             </div>
 
-            <!-- Darts used to checkout (if applicable) -->
-            @if (AvailableCheckoutDartOptions != null && AvailableCheckoutDartOptions.Count > 0)
+            @if (AvailableCheckoutDartOptions?.Count > 0)
             {
                 <div class="mb-2">
                     <label>Number of darts used for checkout:</label>
                     <div class="btn-group mt-1" role="group">
-                        @for (int i = 0; i < AvailableCheckoutDartOptions.Count; i++)
+                        @foreach (var option in AvailableCheckoutDartOptions)
                         {
-                            var option = AvailableCheckoutDartOptions[i];
                             <button type="button"
                                     class="btn @(SelectedDartsUsedOnCheckout == option ? "btn-primary" : "btn-outline-primary")"
                                     @onclick="() => OnSelectDartsUsedOnCheckout(option)">
@@ -111,13 +151,10 @@ else
                 </div>
             }
 
-            <!-- Buttons -->
             <div class="mt-3">
                 <button class="btn btn-success me-2" @onclick="ConfirmCheckoutData">Confirm</button>
                 <button class="btn btn-danger" @onclick="CloseCheckoutPopup">Cancel</button>
             </div>
-
         </div>
     </div>
 }
-
