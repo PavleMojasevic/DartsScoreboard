@@ -11,6 +11,7 @@ namespace DartsScoreboard
         [Inject] DbInitializerService DbInit { get; set; } = default!;
         [Inject] PlayerSelectionService PlayerService { get; set; } = default!;
         [Inject] IUserPersistence UserPersistence { get; set; } = default!;
+        [Inject] StandardGameUserService StandardGameUserService { get; set; } = default!;
         private bool IsFull => PlayerService.SelectedPlayers.Count >= 4;
         protected override async Task OnInitializedAsync()
         {
@@ -67,6 +68,7 @@ namespace DartsScoreboard
             }
 
             GameSettings.SetGameOptions(SelectedScore, SelectedStartWith, SelectedEndWith, SelectedNumOfLegs, SelectedNumOfSets);
+            StandardGameUserService.Players = PlayerService.SelectedPlayers;
             NavManager.NavigateTo("/gameStandardPlay");
         }
     }

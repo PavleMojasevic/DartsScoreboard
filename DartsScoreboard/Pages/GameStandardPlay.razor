@@ -37,80 +37,82 @@
 }
 else
 {
-    <div class="players">
-        @foreach (var player in Players)
-        {
-            <div class="player-box @(Players[CurrentPlayerIndex].Id == player.Id ? "current-player" : "")">
-                <h3>
-                    @player.Name
-                    <span class="text-muted" style="font-size: 0.9rem;">
-                        (Legs: @PlayerScores[player.Id].PlayerLegs, Sets: @PlayerScores[player.Id].PlayerSets)
-                    </span>
-                </h3>
-                <p>Score: @PlayerScores[player.Id].PlayerScore</p>
-                <p>Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
-            </div>
-        }
-    </div>
-
-    <div class="input-area">
-        <!-- Mode Switch -->
-        <div class="btn-group mb-3" role="group">
-            <button class="btn @(UseThreeDartMode ? "btn-outline-secondary" : "btn-primary")" @onclick="() => UseThreeDartMode = false">Regular</button>
-            <button class="btn @(UseThreeDartMode ? "btn-primary" : "btn-outline-secondary")" @onclick="() => UseThreeDartMode = true">3 Darts</button>
+    <div class="main-container">
+        <div class="players">
+            @foreach (var player in Players)
+            {
+                <div class="player-box @(Players[CurrentPlayerIndex].Id == player.Id ? "current-player" : "")">
+                    <h3>
+                        @player.Name
+                        <span class="text-muted" style="font-size: 0.9rem;">
+                            (Legs: @PlayerScores[player.Id].PlayerLegs, Sets: @PlayerScores[player.Id].PlayerSets)
+                        </span>
+                    </h3>
+                    <p>Score: @PlayerScores[player.Id].PlayerScore</p>
+                    <p>Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
+                </div>
+            }
         </div>
 
-        @if (UseThreeDartMode)
-        {
-            <!-- Multiplier Mode Switch -->
+        <div class="input-area">
+            <!-- Mode Switch -->
             <div class="btn-group mb-3" role="group">
-                <button class="btn @(SelectedMultiplier == "S" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "S"'>Single</button>
-                <button class="btn @(SelectedMultiplier == "D" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "D"'>Double</button>
-                <button class="btn @(SelectedMultiplier == "T" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "T"'>Triple</button>
+                <button class="btn @(UseThreeDartMode ? "btn-outline-secondary" : "btn-primary")" @onclick="() => UseThreeDartMode = false">Regular</button>
+                <button class="btn @(UseThreeDartMode ? "btn-primary" : "btn-outline-secondary")" @onclick="() => UseThreeDartMode = true">3 Darts</button>
             </div>
 
-            <!-- Dart Input Squares -->
-            <div class="d-flex justify-content-center mb-2">
-                <div class="dart-input @(DartIndex == 1 ? "active" : "")">@InputScoreDartOne</div>
-                <div class="dart-input @(DartIndex == 2 ? "active" : "")">@InputScoreDartTwo</div>
-                <div class="dart-input @(DartIndex == 3 ? "active" : "")">@InputScoreDartThree</div>
-            </div>
-
-            <!-- Keyboard -->
-            @switch (SelectedMultiplier)
+            @if (UseThreeDartMode)
             {
-                case "D":
-                    <Keyboard KeyboardParameters="KeyboardParamsEachDartDouble" KeyClick="HandleKeyEachDart" />
-                    break;
-                case "T":
-                    <Keyboard KeyboardParameters="KeyboardParamsEachDartTriple" KeyClick="HandleKeyEachDart" />
-                    break;
-                default:
-                    <Keyboard KeyboardParameters="KeyboardParamsEachDartSingle" KeyClick="HandleKeyEachDart" />
-                    break;
+                <!-- Multiplier Mode Switch -->
+                <div class="btn-group mb-3" role="group">
+                    <button class="btn @(SelectedMultiplier == "S" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "S"'>Single</button>
+                    <button class="btn @(SelectedMultiplier == "D" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "D"'>Double</button>
+                    <button class="btn @(SelectedMultiplier == "T" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "T"'>Triple</button>
+                </div>
+
+                <!-- Dart Input Squares -->
+                <div class="d-flex justify-content-center mb-2">
+                    <div class="dart-input @(DartIndex == 1 ? "active" : "")">@InputScoreDartOne</div>
+                    <div class="dart-input @(DartIndex == 2 ? "active" : "")">@InputScoreDartTwo</div>
+                    <div class="dart-input @(DartIndex == 3 ? "active" : "")">@InputScoreDartThree</div>
+                </div>
+
+                <!-- Keyboard -->
+                @switch (SelectedMultiplier)
+                {
+                    case "D":
+                        <Keyboard KeyboardParameters="KeyboardParamsEachDartDouble" KeyClick="HandleKeyEachDart" />
+                        break;
+                    case "T":
+                        <Keyboard KeyboardParameters="KeyboardParamsEachDartTriple" KeyClick="HandleKeyEachDart" />
+                        break;
+                    default:
+                        <Keyboard KeyboardParameters="KeyboardParamsEachDartSingle" KeyClick="HandleKeyEachDart" />
+                        break;
+                }
+
+                <div class="submit-button mt-2">
+                    <button class="btn btn-success" @onclick="SubmitScore">Submit</button>
+                </div>
             }
+            else
+            {
+                <!-- Regular Input Mode -->
+                <div class="input-display text-center mb-2">
+                    <h2>Input: @InputScore</h2>
+                </div>
 
-            <div class="submit-button mt-2">
-                <button class="btn btn-success" @onclick="SubmitScore">Submit</button>
-            </div>
-        }
-        else
-        {
-            <!-- Regular Input Mode -->
-            <div class="input-display text-center mb-2">
-                <h2>Input: @InputScore</h2>
-            </div>
+                <div class="submit-button">
+                    <button class="btn btn-success" @onclick="SubmitScore">
+                        Submit
+                    </button>
+                </div>
 
-            <div class="submit-button">
-                <button class="btn btn-success" @onclick="SubmitScore">
-                    Submit
-                </button>
-            </div>
-
-            <div class="keyboard-container">
-                <Keyboard KeyboardParameters="KeyboardParams" KeyClick="HandleKey" />
-            </div>
-        }
+                <div class="keyboard-container">
+                    <Keyboard KeyboardParameters="KeyboardParams" KeyClick="HandleKey" />
+                </div>
+            }
+        </div>
     </div>
 }
 

@@ -14,6 +14,7 @@
 
 .keyboard-key {
     flex: 1;
+    color:white;
     display: flex;
     justify-content: center;
     align-items: center;

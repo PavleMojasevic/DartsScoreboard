@@ -26,6 +26,7 @@ namespace DartsScoreboard
         [Inject] public IStandardGamePersistence _StandardGamePersistence { get; set; }
         [Inject] public IUserPersistence _UserPersistence { get; set; }
         [Inject] public GameSettingsService GameSettings { get; set; } = default!;
+        [Inject] StandardGameUserService StandardGameUserService { get; set; } = default!;
 
         // Player info
         public List<User> Players { get; set; } = new();
@@ -78,6 +79,7 @@ namespace DartsScoreboard
 
         protected override void OnInitialized()
         {
+            PlayerService.SelectedPlayers = StandardGameUserService.Players;
             StartingPlayerIndexSets = 0;
             StartingPlayerIndexLegs = 0;
             CurrentPlayerIndex = StartingPlayerIndexLegs;
@@ -153,7 +155,7 @@ namespace DartsScoreboard
                     ShowCheckoutPopup = true;
                 }
             }
-            else if (PlayerScores[currentPlayer.Id].PlayerScore > 40 || (PlayerScores[currentPlayer.Id].PlayerScore % 2 != 0 && PlayerScores[currentPlayer.Id].PlayerScore > 1) || 
+            else if (PlayerScores[currentPlayer.Id].PlayerScore > 40 || (PlayerScores[currentPlayer.Id].PlayerScore % 2 != 0 && PlayerScores[currentPlayer.Id].PlayerScore > 1) ||
                 !(PlayerScores[currentPlayer.Id].PlayerScore != 101 && PlayerScores[currentPlayer.Id].PlayerScore != 104 && PlayerScores[currentPlayer.Id].PlayerScore != 107 && PlayerScores[currentPlayer.Id].PlayerScore != 110))
             {
                 if (PlayerScores[currentPlayer.Id].PlayerScore - score == 0)
@@ -171,7 +173,7 @@ namespace DartsScoreboard
                         }
                     }
                     else
-                    { 
+                    {
                         AvailableCheckoutDartOptions = new List<int> { 2, 3 };      // TODO: Add eachDart keyboard options
                     }
                     ShowCheckoutPopup = true;
@@ -237,7 +239,7 @@ namespace DartsScoreboard
                 currentPlayer.Stats.CheckoutPercentage = ((PlayerScores[currentPlayer.Id].PlayerLegs + (NumOfSets * NumOfLegs)) / (double)currentPlayer.Stats.NumOfDoublesThrown) * 100;
             else
                 currentPlayer.Stats.CheckoutPercentage = 0;
-            
+
 
         }
         private void ConfirmCheckoutData()
@@ -245,7 +247,7 @@ namespace DartsScoreboard
 
             if (int.TryParse(InputScore, out int score))
             {
-               var currentPlayer = Players[CurrentPlayerIndex];
+                var currentPlayer = Players[CurrentPlayerIndex];
 
                 currentPlayer.Stats.NumOfDoublesThrown += SelectedDartsUsedOnDouble;
 
@@ -259,13 +261,13 @@ namespace DartsScoreboard
                 ShowCheckoutPopup = false;
                 SelectedDartsUsedOnDouble = 0;
                 SelectedDartsUsedOnCheckout = 0;
-                
+
                 SubmintigScore(score);
             }
         }
         private void SubmitScore()
         {
-            if (true) // TODO: Check witch keyboard is used
+            if (UseThreeDartMode) // TODO: Check witch keyboard is used
             {
                 InputScore = CombineScore().ToString();
             }
@@ -346,7 +348,7 @@ namespace DartsScoreboard
                 InputScore = "";
                 return;
             }
-            
+
             PlayerScores[currentPlayer.Id].PlayerScore -= score;
             UpdateHighScoreHits(currentPlayer, score);
 
@@ -356,7 +358,7 @@ namespace DartsScoreboard
                 player.Stats.ThreeDartAverage = (double)(PlayerScores[player.Id].PlayerCollectedScore / ((double)PlayerScores[player.Id].PlayerThrows / 3));
 
                 if (player.Stats.NumOfDoublesThrown > 0)
-                    player.Stats.CheckoutPercentage = ((PlayerScores[player.Id].PlayerLegs + (NumOfSets * NumOfLegs))/ (double)player.Stats.NumOfDoublesThrown) * 100;
+                    player.Stats.CheckoutPercentage = ((PlayerScores[player.Id].PlayerLegs + (NumOfSets * NumOfLegs)) / (double)player.Stats.NumOfDoublesThrown) * 100;
                 else
                     player.Stats.CheckoutPercentage = 0;
             }
@@ -601,19 +603,19 @@ namespace DartsScoreboard
         {
             KeyboardKeys = new List<List<KeyboardKey>>
             {
-                new List<KeyboardKey> 
+                new List<KeyboardKey>
                 {
                     new() { Text = "1", Value = "1" },
                     new() { Text = "2", Value = "2" },
                     new() { Text = "3", Value = "3" }
                 },
-                new List<KeyboardKey> 
+                new List<KeyboardKey>
                 {
                     new() { Text = "4", Value = "4" },
                     new() { Text = "5", Value = "5" },
                     new() { Text = "6", Value = "6" }
                 },
-                new List<KeyboardKey> 
+                new List<KeyboardKey>
                 {
                     new() { Text = "7", Value = "7" },
                     new() { Text = "8", Value = "8" },

@@ -52,17 +52,28 @@
     line-height: 60px;
     border-radius: 8px;
     background-color: #f8f9fa;
+    color:black;
 }
 
 .dart-input.active {
     border-color: #007bff;
     background-color: #e0f0ff;
 }
-
+.player-box
+{
+    padding:10px;
+}
+.text-muted
+{
+    color:white !important;
+}
 .current-player {
     border: 2px solid #007bff;
-    background-color: #f0f8ff;
+    background-color: var(--color1);
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
     transition: all 0.3s ease-in-out;
+}
+.main-container { 
+    padding: 20px 20px;
 }

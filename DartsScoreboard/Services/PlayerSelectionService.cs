@@ -1,11 +1,11 @@
-﻿using IndexedDB.Blazor; 
+﻿using IndexedDB.Blazor;
 
 namespace DartsScoreboard;
 
 public class PlayerSelectionService
 {
     public List<User> AllUsers { get; private set; } = new();
-    public List<User> SelectedPlayers { get; private set;} = new();
+    public List<User> SelectedPlayers { get; set; } = new();
     public int GuestCounter { get; private set; } = 1;
 
     public bool ShowAddPopup { get; set; } = false;
@@ -19,9 +19,9 @@ public class PlayerSelectionService
 
     public void Reset()
     {
-        SelectedPlayers.Clear(); 
-        GuestCounter = 1; 
-        ShowAddPopup = false; 
+        SelectedPlayers.Clear();
+        GuestCounter = 1;
+        ShowAddPopup = false;
         ShowUserDropdown = false;
     }
 
@@ -54,8 +54,8 @@ public class PlayerSelectionService
     }
     public void AddExistingPlayer(User user)
     {
-        if (SelectedPlayers.Count > 4) return ;
-        if (SelectedPlayers.Exists(p=>p.Id == user.Id)) return;
+        if (SelectedPlayers.Count > 4) return;
+        if (SelectedPlayers.Exists(p => p.Id == user.Id)) return;
 
         SelectedPlayers.Add(user);
         CloseAddPopup();
