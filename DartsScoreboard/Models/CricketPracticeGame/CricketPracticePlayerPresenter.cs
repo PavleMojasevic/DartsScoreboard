@@ -1,4 +1,4 @@
-﻿namespace DartsScoreboard;
+﻿namespace DartsScoreboard.Models.CricketPracticeGame;
 
 public class CricketPracticePlayerPresenter
 {
