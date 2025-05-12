@@ -8,11 +8,25 @@
             <div class="keyboard-row">
                 @foreach (KeyboardKey keyboardKey in keyboardRow)
                 {
-                    <div class="keyboard-key"   @onclick="@(()=>KeyClick.InvokeAsync(keyboardKey))">
+                    bool isDisabled = keyboardKey.IsDisabled?.Invoke() ?? false;
+
+                    <button class="keyboard-key"
+                    style="@GetStyle(keyboardKey, isDisabled)"
+                    disabled="@isDisabled"
+                    @onclick="@(() => { if (!isDisabled) KeyClick.InvokeAsync(keyboardKey); })">
                         @keyboardKey.Text
-                    </div>
+                    </button>
                 }
             </div>
         }
     </div>
-} 
+}
+@code
+{
+    private string GetStyle(KeyboardKey keyboardKey, bool isDisabed)
+    {
+        if (isDisabed)
+            return keyboardKey.StyleDisabled;
+        return keyboardKey.Style;
+    }
+}

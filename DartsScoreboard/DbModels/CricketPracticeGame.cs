@@ -14,7 +14,6 @@ public class CricketPracticeGame
 }
 public class CricketPracticeGamePlayer
 {
-    public int Id { get; set; }
     public int? UserId { get; set; }
     public string? GuestName { get; set; }
     public List<CricketPracticeGamePlayerThrow> Throws { get; set; } = new();

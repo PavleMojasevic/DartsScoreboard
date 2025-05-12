@@ -13,10 +13,10 @@ public partial class KeyboardTest
         {
             new List<KeyboardKey>
             {
-                new KeyboardKey { Text = "1", Value = "1" },
-                new KeyboardKey { Text = "2", Value = "2" },
-                new KeyboardKey { Text = "3", Value = "3" },
-                new KeyboardKey { Text = "4", Value = "4" },
+                new KeyboardKey { Text = "1", Value = "1",IsDisabled=()=>true },
+                new KeyboardKey { Text = "2", Value = "2",IsDisabled=()=>true },
+                new KeyboardKey { Text = "3", Value = "3",IsDisabled=()=>false },
+                new KeyboardKey { Text = "4", Value = "4" , IsDisabled =() => false},
                 new KeyboardKey { Text = "5", Value = "5" },
                 new KeyboardKey { Text = "6", Value = "6" },
                 new KeyboardKey { Text = "7", Value = "7" },

@@ -20,16 +20,16 @@ public partial class CricketPracticeGamePage
     private List<CricketPracticeGameThrowStack> _Stack = new();
     private bool _IsEndOfGame = false;
     public KeyboardParameters KeyboardParameters => CurrentTarget == "BULL" ? num2 : num3;
-
+    private static string _KeyboardKeyStyle = "color:white";
     KeyboardParameters num2 = new KeyboardParameters
     {
         KeyboardKeys = new List<List<KeyboardKey>>
         {
             new List<KeyboardKey>
             {
-                new KeyboardKey{Text="0",Value="0"},
-                new KeyboardKey{Text="1",Value="1"},
-                new KeyboardKey{Text="2",Value="2"},
+                new KeyboardKey{Text="0",Value="0", Style=_KeyboardKeyStyle },
+                new KeyboardKey{Text="1",Value="1", Style=_KeyboardKeyStyle},
+                new KeyboardKey{Text="2",Value="2", Style=_KeyboardKeyStyle},
             }
         }
     };
@@ -39,13 +39,43 @@ public partial class CricketPracticeGamePage
         {
             new List<KeyboardKey>
             {
-                new KeyboardKey{Text="0",Value="0"},
-                new KeyboardKey{Text="1",Value="1"},
-                new KeyboardKey{Text="2",Value="2"},
-                new KeyboardKey{Text = "3",Value = "3"},
+                new KeyboardKey{Text="0",Value="0", Style = _KeyboardKeyStyle},
+                new KeyboardKey{Text="1",Value="1", Style = _KeyboardKeyStyle},
+                new KeyboardKey{Text="2",Value="2", Style = _KeyboardKeyStyle},
+                new KeyboardKey{Text = "3",Value = "3", Style = _KeyboardKeyStyle},
             }
         }
     };
+    protected override async Task OnParametersSetAsync()
+    {
+        if (gameCode == null)
+        {
+            return;
+        }
+        var game = await _CricketPracticeGamePersistence.Get(gameCode);
+        if (game == null)
+        {
+            _NavigationManager.NavigateTo($"/cricket-practice-setup");
+            return;
+        }
+        Game = game;
+        int throwCount = Game.Players.Min(x => x.Throws.Count(x => x.ThirdDart != -1));
+        if (Game.Targets.Count == throwCount)
+        {
+            await EndOfGame();
+            return;
+        }
+        Round = throwCount + 1;
+        var users = await _UserPersistence.GetAllUsers();
+        Players = Game.Players.Select(x => new CricketPracticePlayerPresenter
+        {
+            Throws = x.Throws,
+            UserId = x.UserId,
+            UserName = users.FirstOrDefault(u => u.Id == x.UserId)?.Name ?? x.GuestName ?? "Guest",
+        }).ToList();
+
+        ResolvePlayerOnTurn(throwCount);
+    }
     public async Task HandleKey(KeyboardKey key)
     {
         int score = int.Parse(key.Value);
@@ -143,39 +173,9 @@ public partial class CricketPracticeGamePage
     private async Task EndOfGame()
     {
         _IsEndOfGame = true;
-        //todo
+        _NavigationManager.NavigateTo($"/cricket-practice-final/{gameCode}");
     }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        if (gameCode == null)
-        {
-            return;
-        }
-        var game = await _CricketPracticeGamePersistence.Get(gameCode);
-        if (game == null)
-        {
-            //TODO: handle game not found
-            return;
-        }
-        Game = game;
-        int throwCount = Game.Players.Min(x => x.Throws.Count(x => x.ThirdDart != -1));
-        if (Game.Targets.Count == throwCount)
-        {
-            await EndOfGame();
-            return;
-        }
-        Round = throwCount + 1;
-        var users = await _UserPersistence.GetAllUsers();
-        Players = Game.Players.Select(x => new CricketPracticePlayerPresenter
-        {
-            Throws = x.Throws,
-            UserId = x.UserId,
-            UserName = users.FirstOrDefault(u => u.Id == x.UserId)?.Name ?? x.GuestName ?? "Guest",
-        }).ToList();
-
-        ResolvePlayerOnTurn(throwCount);
-    }
 
     private void ResolvePlayerOnTurn(int throwCount)
     {
