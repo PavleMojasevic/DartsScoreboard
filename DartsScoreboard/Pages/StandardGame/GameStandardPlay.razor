@@ -1,5 +1,5 @@
 ﻿@namespace DartsScoreboard
-@page "/gameStandardPlay"
+@page "/gameStandardPlay/{GameCode}"
 
 @if (WinnerPopup)
 {
@@ -63,18 +63,18 @@ else
 
             @if (UseThreeDartMode)
             {
-                <!-- Multiplier Mode Switch -->
-                <div class="btn-group mb-3" role="group">
-                    <button class="btn @(SelectedMultiplier == "S" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "S"'>Single</button>
-                    <button class="btn @(SelectedMultiplier == "D" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "D"'>Double</button>
-                    <button class="btn @(SelectedMultiplier == "T" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "T"'>Triple</button>
-                </div>
-
                 <!-- Dart Input Squares -->
                 <div class="d-flex justify-content-center mb-2">
                     <div class="dart-input @(DartIndex == 1 ? "active" : "")">@InputScoreDartOne</div>
                     <div class="dart-input @(DartIndex == 2 ? "active" : "")">@InputScoreDartTwo</div>
                     <div class="dart-input @(DartIndex == 3 ? "active" : "")">@InputScoreDartThree</div>
+                </div>
+
+                <!-- Multiplier Mode Switch -->
+                <div class="btn-group mb-3" role="group">
+                    <button class="btn @(SelectedMultiplier == "S" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "S"'>Single</button>
+                    <button class="btn @(SelectedMultiplier == "D" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "D"'>Double</button>
+                    <button class="btn @(SelectedMultiplier == "T" ? "btn-primary" : "btn-outline-secondary")" @onclick='() => SelectedMultiplier = "T"'>Triple</button>
                 </div>
 
                 <!-- Keyboard -->
@@ -120,10 +120,10 @@ else
 {
     <div class="modal-overlay">
         <div class="modal-box">
-            <h4>Checkout Information</h4>
+            <h4 style="color:black">Checkout Information</h4>
 
             <div class="mb-2">
-                <label>Number of darts thrown at double:</label>
+                <label style="color:black">Number of darts thrown at double:</label>
                 <div class="btn-group mt-1" role="group">
                     @foreach (var option in AvailableDoubleDartOptions)
                     {
@@ -139,7 +139,7 @@ else
             @if (AvailableCheckoutDartOptions?.Count > 0)
             {
                 <div class="mb-2">
-                    <label>Number of darts used for checkout:</label>
+                    <label style="color:black">Number of darts used for checkout:</label>
                     <div class="btn-group mt-1" role="group">
                         @foreach (var option in AvailableCheckoutDartOptions)
                         {

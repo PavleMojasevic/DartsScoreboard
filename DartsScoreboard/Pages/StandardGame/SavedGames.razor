@@ -1,0 +1,29 @@
+﻿@namespace DartsScoreboard
+@page "/saved-games"
+
+<h3>Saved Games</h3>
+
+@if (SavedGamesList == null || !SavedGamesList.Any())
+{
+    <p>No saved games found.</p>
+}
+else
+{
+    <ul>
+        @foreach (var game in SavedGamesList)
+        {
+            <li style="margin-bottom: 10px;">
+                <strong>Game Code:</strong> @game.Code
+                <br />
+                <strong>Players:</strong> @string.Join(", ", game.Players.Select(p => p.Name))
+                <br />
+                <strong>Points:</strong> @game.StartingPoints |
+                Sets: @game.NumOfSets |
+                Legs: @game.NumOfLegs
+                <br />
+                <button @onclick="() => ResumeGame(game.Code)">Resume</button>
+                <button @onclick="() => DeleteGame(game.Code)">Delete</button>
+            </li>
+        }
+    </ul>
+}

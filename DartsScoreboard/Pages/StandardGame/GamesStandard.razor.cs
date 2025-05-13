@@ -7,11 +7,16 @@ namespace DartsScoreboard
 {
     public partial class GamesStandard
     {
-        // Player settings
+        [Parameter] public string GameCode { get; set; } = "";
+
+        [Inject] NavigationManager NavManager { get; set; } = default!;
+        [Inject] IUserPersistence UserPersistence { get; set; } = default!;
+        [Inject] IStandardGamePersistence _StandardGamePersistence { get; set; } = default!;
+        [Inject] public GameSettingsService GameSettings { get; set; } = default!;
         [Inject] DbInitializerService DbInit { get; set; } = default!;
         [Inject] PlayerSelectionService PlayerService { get; set; } = default!;
-        [Inject] IUserPersistence UserPersistence { get; set; } = default!;
         [Inject] StandardGameUserService StandardGameUserService { get; set; } = default!;
+
         private bool IsFull => PlayerService.SelectedPlayers.Count >= 4;
         protected override async Task OnInitializedAsync()
         {
@@ -56,9 +61,10 @@ namespace DartsScoreboard
         {
             SelectedEndWith = endWith;
         }
-
-        [Inject] NavigationManager NavManager { get; set; } = default!;
-        [Inject] public GameSettingsService GameSettings { get; set; } = default!;
+        private void GoToSavedGames()
+        {
+            NavManager.NavigateTo("/saved-games");
+        }
         private void StartGame()
         {
             if (PlayerService.SelectedPlayers == null || PlayerService.SelectedPlayers.Count == 0)
@@ -67,9 +73,12 @@ namespace DartsScoreboard
                 return;
             }
 
+            string gameCode = Guid.NewGuid().ToString();
+
             GameSettings.SetGameOptions(SelectedScore, SelectedStartWith, SelectedEndWith, SelectedNumOfLegs, SelectedNumOfSets);
             StandardGameUserService.Players = PlayerService.SelectedPlayers;
-            NavManager.NavigateTo("/gameStandardPlay");
+
+            NavManager.NavigateTo($"/gameStandardPlay/{gameCode}");
         }
     }
 }

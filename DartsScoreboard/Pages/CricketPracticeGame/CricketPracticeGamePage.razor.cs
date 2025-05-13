@@ -27,7 +27,7 @@ public partial class CricketPracticeGamePage
         {
             new List<KeyboardKey>
             {
-                new KeyboardKey{Text="0",Value="0", Style=_KeyboardKeyStyle },
+                new KeyboardKey{Text="0",Value="0", Style=_KeyboardKeyStyle},
                 new KeyboardKey{Text="1",Value="1", Style=_KeyboardKeyStyle},
                 new KeyboardKey{Text="2",Value="2", Style=_KeyboardKeyStyle},
             }

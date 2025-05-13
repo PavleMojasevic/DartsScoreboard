@@ -1,6 +1,13 @@
 ﻿using IndexedDB.Blazor;
 
 namespace DartsScoreboard;
+public interface IStandardGamePersistence
+{
+    Task AddOrUpdate(StandardGame entity);
+    Task<StandardGame?> Get(string id);
+    Task<List<StandardGame>> GetAll();
+    Task Remove(string id);
+}
 
 public class StandardGamePersistence : IStandardGamePersistence
 {
@@ -10,10 +17,35 @@ public class StandardGamePersistence : IStandardGamePersistence
     {
         _DbFactory = dbFactory;
     }
-    public async Task Add(StandardGame entity)
+    public async Task AddOrUpdate(StandardGame entity)
     {
         using var db = await _DbFactory.Create<DartsScoreBoardDb>();
-        db.StandardGames.Add(entity);
+        var existingEntity = db.StandardGames.FirstOrDefault(x => x.Code == entity.Code);
+        if (existingEntity == null)
+            db.StandardGames.Add(entity);
+        else
+        {
+            existingEntity.Players = entity.Players;
+            existingEntity.StartingPoints = entity.StartingPoints;
+
+            existingEntity.NumOfSets = entity.NumOfSets;
+            existingEntity.NumOfLegs = entity.NumOfLegs;
+            existingEntity.StartingIn = entity.StartingIn;
+            existingEntity.StartingOut = entity.StartingOut;
+
+            existingEntity.CurrentPlayerIndex = entity.CurrentPlayerIndex;
+            existingEntity.InputScoreDartOne = entity.InputScoreDartOne;
+            existingEntity.InputScoreDartTwo = entity.InputScoreDartTwo;
+            existingEntity.InputScoreDartThree = entity.InputScoreDartThree;
+            existingEntity.DartIndex = entity.DartIndex;
+            existingEntity.UseThreeDartMode = entity.UseThreeDartMode;
+            existingEntity.SelectedMultiplier = entity.SelectedMultiplier;
+            existingEntity.WinnerPopup = entity.WinnerPopup;
+
+            existingEntity.PlayerScores = entity.PlayerScores;
+            existingEntity.PlayerStats = entity.PlayerStats;
+        }
+        // db.StandardGames.Add(entity);
         await db.SaveChanges();
     }
     public async Task Remove(string code)
