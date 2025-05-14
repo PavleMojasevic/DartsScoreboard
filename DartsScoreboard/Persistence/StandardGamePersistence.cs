@@ -44,6 +44,7 @@ public class StandardGamePersistence : IStandardGamePersistence
 
             existingEntity.PlayerScores = entity.PlayerScores;
             existingEntity.PlayerStats = entity.PlayerStats;
+            existingEntity.UndoHistory = entity.UndoHistory;
         }
         // db.StandardGames.Add(entity);
         await db.SaveChanges();

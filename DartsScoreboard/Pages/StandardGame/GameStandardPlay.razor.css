@@ -65,7 +65,7 @@
 }
 .text-muted
 {
-    color:white !important;
+    color:lightgray !important;
 }
 .current-player {
     border: 2px solid #007bff;

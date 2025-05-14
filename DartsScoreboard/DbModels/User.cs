@@ -11,6 +11,7 @@ public class User
 public class UserStats
 {
     public double ThreeDartAverage { get; set; }
+    public double ThreeDartLegAverage { get; set; }
     public double FirstNineAverage { get; set; }
     public int NumOfDoublesThrown { get; set; }
     public double CheckoutPercentage { get; set; }

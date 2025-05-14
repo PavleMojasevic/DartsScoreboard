@@ -44,11 +44,12 @@ else
                 <div class="player-box @(Players[CurrentPlayerIndex].Id == player.Id ? "current-player" : "")">
                     <h3>
                         @player.Name
-                        <span class="text-muted" style="font-size: 0.9rem;">
-                            (Legs: @PlayerScores[player.Id].PlayerLegs, Sets: @PlayerScores[player.Id].PlayerSets)
+                        <span class="text-muted" style="font-size: 1.5rem;">
+                            Legs: @PlayerScores[player.Id].PlayerLegs, Sets: @PlayerScores[player.Id].PlayerSets
                         </span>
                     </h3>
                     <p>Score: @PlayerScores[player.Id].PlayerScore</p>
+                    <p>Leg Average: @player.Stats.ThreeDartLegAverage.ToString("F2")</p>
                     <p>Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
                 </div>
             }

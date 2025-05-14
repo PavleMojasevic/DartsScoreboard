@@ -1,6 +1,7 @@
 ﻿using DartsScoreboard.Services;
 using Microsoft.AspNetCore.Components;
 using System.Numerics;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace DartsScoreboard
@@ -9,6 +10,7 @@ namespace DartsScoreboard
     {
         public int PlayerScore { get; set; }
         public int PlayerThrows { get; set; }
+        public int PlayerThrowsLeg { get; set; }
         public int PlayerSets { get; set; }
         public int PlayerLegs { get; set; }
         public int PlayerCollectedScore { get; set; }
@@ -87,6 +89,8 @@ namespace DartsScoreboard
                 var savedGame = await _StandardGamePersistence.Get(GameCode);
                 if (savedGame != null)
                 {
+                    UndoStack = new Stack<RoundSnapshot>(savedGame.UndoHistory);
+
                     // Restore game state
                     GameCode = savedGame.Code;
                     Players = savedGame.Players;
@@ -129,6 +133,7 @@ namespace DartsScoreboard
                 {
                     PlayerScore = StartingScore,
                     PlayerThrows = 0,
+                    PlayerThrowsLeg = 0,
                     PlayerSets = 0,
                     PlayerLegs = 0,
                     PlayerCollectedScore = 0
@@ -170,7 +175,7 @@ namespace DartsScoreboard
             var currentPlayer = Players[CurrentPlayerIndex];
             return NoFinishScores.Contains(PlayerScores[currentPlayer.Id].PlayerScore);
         }
-        private void DoubleOutCheckout(int score)
+        private async Task DoubleOutCheckout(int score)
         {
             var currentPlayer = Players[CurrentPlayerIndex];
 
@@ -184,17 +189,22 @@ namespace DartsScoreboard
             if (NoScore())
             {
                 PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
             }
             else if (PlayerScores[currentPlayer.Id].PlayerScore > 100 || PlayerScores[currentPlayer.Id].PlayerScore == 99)
             {
                 PlayerScores[currentPlayer.Id].PlayerThrows += 3;
-                currentPlayer.Stats.NumOfDoublesThrown += 1;
+                PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
                 if (PlayerScores[currentPlayer.Id].PlayerScore - score < 51 && PlayerScores[currentPlayer.Id].PlayerScore - score > 1)
                 {
                     // Setup the popup
                     AvailableDoubleDartOptions = new List<int> { 0, 1 };
                     AvailableCheckoutDartOptions = new();
                     ShowCheckoutPopup = true;
+                }
+                else if (PlayerScores[currentPlayer.Id].PlayerScore - score == 0)
+                {
+                    currentPlayer.Stats.NumOfDoublesThrown += 1;
                 }
             }
             else if (PlayerScores[currentPlayer.Id].PlayerScore > 40 || PlayerScores[currentPlayer.Id].PlayerScore % 2 != 0 && PlayerScores[currentPlayer.Id].PlayerScore > 1 ||
@@ -208,10 +218,12 @@ namespace DartsScoreboard
                         if (InputScoreDartThree != "")
                         {
                             PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                            PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
                         }
                         else
                         {
                             PlayerScores[currentPlayer.Id].PlayerThrows += 2;
+                            PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 2;
                         }
                     }
                     else
@@ -223,11 +235,13 @@ namespace DartsScoreboard
                 else if (PlayerScores[currentPlayer.Id].PlayerScore - score > 50)
                 {
                     PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                    PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
                 }
                 else if (PlayerScores[currentPlayer.Id].PlayerScore - score < 51)
                 {
                     // Setup the popup
                     PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                    PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
                     AvailableDoubleDartOptions = new List<int> { 0, 1, 2 };
                     AvailableCheckoutDartOptions = new();
                     ShowCheckoutPopup = true;
@@ -243,14 +257,17 @@ namespace DartsScoreboard
                         if (InputScoreDartThree != "")
                         {
                             PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                            PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
                         }
                         else if (InputScoreDartTwo != "")
                         {
                             PlayerScores[currentPlayer.Id].PlayerThrows += 2;
+                            PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 2;
                         }
                         else
                         {
                             PlayerScores[currentPlayer.Id].PlayerThrows += 1;
+                            PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 1;
                         }
                     }
                     else
@@ -262,6 +279,7 @@ namespace DartsScoreboard
                 else if (PlayerScores[currentPlayer.Id].PlayerScore - score > 1)
                 {
                     PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                    PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
                     AvailableDoubleDartOptions = new List<int> { 0, 1, 2, 3 };
                     AvailableCheckoutDartOptions = new();
                     ShowCheckoutPopup = true;
@@ -274,9 +292,14 @@ namespace DartsScoreboard
                 return; // ERROR: No valid checkout
             }
 
-            // Stats
+            // Three dart leg average
+            currentPlayer.Stats.ThreeDartLegAverage = (double)((StartingScore - PlayerScores[currentPlayer.Id].PlayerScore) / ((double)PlayerScores[currentPlayer.Id].PlayerThrowsLeg / 3));
+
+            // Three dart average
             PlayerScores[currentPlayer.Id].PlayerCollectedScore += score;
             currentPlayer.Stats.ThreeDartAverage = (double)(PlayerScores[currentPlayer.Id].PlayerCollectedScore / ((double)PlayerScores[currentPlayer.Id].PlayerThrows / 3));
+
+            // Checkout percentage
             if (currentPlayer.Stats.NumOfDoublesThrown > 0)
                 currentPlayer.Stats.CheckoutPercentage = (PlayerScores[currentPlayer.Id].PlayerLegs + NumOfSets * NumOfLegs) / (double)currentPlayer.Stats.NumOfDoublesThrown * 100;
             else
@@ -295,6 +318,7 @@ namespace DartsScoreboard
                 {
                     // Only when you actually offered Checkout Options
                     PlayerScores[currentPlayer.Id].PlayerThrows += SelectedDartsUsedOnCheckout;
+                    PlayerScores[currentPlayer.Id].PlayerThrowsLeg += SelectedDartsUsedOnCheckout;
                 }
 
                 // Close popup
@@ -338,6 +362,7 @@ namespace DartsScoreboard
                         {
                             PlayerScore = PlayerScores[p.Id].PlayerScore,
                             PlayerThrows = PlayerScores[p.Id].PlayerThrows,
+                            PlayerThrowsLeg = PlayerScores[p.Id].PlayerThrowsLeg,
                             PlayerLegs = PlayerScores[p.Id].PlayerLegs,
                             PlayerSets = PlayerScores[p.Id].PlayerSets,
                             PlayerCollectedScore = PlayerScores[p.Id].PlayerCollectedScore
@@ -350,6 +375,7 @@ namespace DartsScoreboard
                             {
                                 ThreeDartAverage = p.Stats.ThreeDartAverage,
                                 CheckoutPercentage = p.Stats.CheckoutPercentage,
+                                ThreeDartLegAverage = p.Stats.ThreeDartLegAverage,
                                 HighScoreHits = new Dictionary<string, int>(p.Stats.HighScoreHits)
                             }
                         }).ToList()
@@ -361,9 +387,16 @@ namespace DartsScoreboard
                     if (PlayerScores[currentPlayer.Id].PlayerScore > 170 || StartingOut != "DOUBLE OUT")
                     {
                         PlayerScores[currentPlayer.Id].PlayerThrows += 3;
-                        // Stats
+                        PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
+
+                        // Three dart leg average
+                        currentPlayer.Stats.ThreeDartLegAverage = (double)((StartingScore - PlayerScores[currentPlayer.Id].PlayerScore) / ((double)PlayerScores[currentPlayer.Id].PlayerThrowsLeg / 3));
+
+                        // Three dart average
                         PlayerScores[currentPlayer.Id].PlayerCollectedScore += score;
                         currentPlayer.Stats.ThreeDartAverage = (double)(PlayerScores[currentPlayer.Id].PlayerCollectedScore / ((double)PlayerScores[currentPlayer.Id].PlayerThrows / 3));
+
+                        // Checkout percentage
                         if (currentPlayer.Stats.NumOfDoublesThrown > 0)
                             currentPlayer.Stats.CheckoutPercentage = (PlayerScores[currentPlayer.Id].PlayerLegs + NumOfSets * NumOfLegs) / (double)currentPlayer.Stats.NumOfDoublesThrown * 100;
                         else
@@ -381,7 +414,7 @@ namespace DartsScoreboard
                             }
                         }
 
-                        DoubleOutCheckout(score);
+                        await DoubleOutCheckout(score);
                     }
 
                     if (!ShowCheckoutPopup)
@@ -416,7 +449,19 @@ namespace DartsScoreboard
             // Loading other player scores
             foreach (var player in Players)
             {
-                player.Stats.ThreeDartAverage = (double)(PlayerScores[player.Id].PlayerCollectedScore / ((double)PlayerScores[player.Id].PlayerThrows / 3));
+                if (PlayerScores[player.Id].PlayerThrows > 0 && PlayerScores[player.Id].PlayerThrowsLeg > 0)
+                {
+                    // Three dart leg average
+                    currentPlayer.Stats.ThreeDartLegAverage = (double)((StartingScore - PlayerScores[currentPlayer.Id].PlayerScore) / ((double)PlayerScores[currentPlayer.Id].PlayerThrowsLeg / 3));
+
+                    // Three dart average
+                    player.Stats.ThreeDartAverage = (double)(PlayerScores[player.Id].PlayerCollectedScore / ((double)PlayerScores[player.Id].PlayerThrows / 3));
+                }
+                else
+                {
+                    player.Stats.ThreeDartAverage = 0;
+                    player.Stats.ThreeDartLegAverage = 0;
+                }
 
                 if (player.Stats.NumOfDoublesThrown > 0)
                     player.Stats.CheckoutPercentage = (PlayerScores[player.Id].PlayerLegs + NumOfSets * NumOfLegs) / (double)player.Stats.NumOfDoublesThrown * 100;
@@ -433,6 +478,7 @@ namespace DartsScoreboard
                     {
                         PlayerScores[players.Id].PlayerLegs = 0;
                         PlayerScores[players.Id].PlayerScore = GameSettings.StartingScore;
+                        PlayerScores[players.Id].PlayerThrowsLeg = 0;
                     }
 
                     // Rotate starting player for next leg/set
@@ -445,6 +491,7 @@ namespace DartsScoreboard
                     foreach (var players in Players)
                     {
                         PlayerScores[players.Id].PlayerScore = GameSettings.StartingScore;
+                        PlayerScores[players.Id].PlayerThrowsLeg = 0;
                     }
 
                     // Rotate starting player for next leg/set
@@ -454,8 +501,8 @@ namespace DartsScoreboard
 
                 if (PlayerScores[currentPlayer.Id].PlayerSets == NumOfSets)
                 {
-                    WinnerPopup = true;
-                    await SaveGameAsync();
+                    WinnerPopup = true; 
+                    await _StandardGamePersistence.Remove(GameCode);
                     return;
                 }
             }
@@ -464,12 +511,14 @@ namespace DartsScoreboard
                 // Player has busted
                 PlayerScores[currentPlayer.Id].PlayerScore += score;
                 PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
             }
             else if (PlayerScores[currentPlayer.Id].PlayerScore == 1)
             {
                 // Player has busted
                 PlayerScores[currentPlayer.Id].PlayerScore += score;
                 PlayerScores[currentPlayer.Id].PlayerThrows += 3;
+                PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
             }
             else
             {
@@ -540,7 +589,8 @@ namespace DartsScoreboard
                     Id = p.Id,
                     Name = p.Name,
                     Stats = p.Stats
-                }).ToList()
+                }).ToList(),
+                UndoHistory = UndoStack.Reverse().ToList()
             };
 
             await _StandardGamePersistence.AddOrUpdate(save);
@@ -549,12 +599,15 @@ namespace DartsScoreboard
         private async Task ResetGame()
         {
             GameCode = Guid.NewGuid().ToString();
+
             CurrentPlayerIndex = 0;
             DartIndex = 1;
+
             InputScore = "";
             InputScoreDartOne = "";
             InputScoreDartTwo = "";
             InputScoreDartThree = "";
+
             WinnerPopup = false;
             UndoStack.Clear();
 
@@ -564,6 +617,7 @@ namespace DartsScoreboard
                 {
                     PlayerScore = StartingScore,
                     PlayerThrows = 0,
+                    PlayerThrowsLeg = 0,
                     PlayerSets = 0,
                     PlayerLegs = 0,
                     PlayerCollectedScore = 0
@@ -571,6 +625,7 @@ namespace DartsScoreboard
 
                 player.Stats.HighestScore = 0;
                 player.Stats.ThreeDartAverage = 0;
+                player.Stats.ThreeDartLegAverage = 0;
                 player.Stats.CheckoutPercentage = 0;
 
                 foreach (var key in player.Stats.HighScoreHits.Keys.ToList())

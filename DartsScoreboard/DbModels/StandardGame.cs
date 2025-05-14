@@ -26,6 +26,7 @@ public class StandardGame
     // Score tracking
     public Dictionary<int, PlayerScoreInfo> PlayerScores { get; set; } = new();
     public List<User> PlayerStats { get; set; } = new(); // for restoring averages, high scores, etc.
+    public List<RoundSnapshot> UndoHistory { get; set; } = new();
 
     public StandardGame() { }
 
@@ -45,6 +46,7 @@ public class StandardGame
             {
                 PlayerScore = startingPoints,
                 PlayerThrows = 0,
+                PlayerThrowsLeg = 0,
                 PlayerSets = 0,
                 PlayerLegs = 0,
                 PlayerCollectedScore = 0
