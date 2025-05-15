@@ -27,6 +27,7 @@ namespace DartsScoreboard
         // Unique code per game
         [Parameter] public string GameCode { get; set; } = "";
 
+        [Inject] NavigationManager NavManager { get; set; } = default!;
         [Inject] public PlayerSelectionService PlayerService { get; set; } = default!;
         [Inject] public IStandardGamePersistence _StandardGamePersistence { get; set; }
         [Inject] public IUserPersistence _UserPersistence { get; set; }
@@ -149,7 +150,30 @@ namespace DartsScoreboard
             }
         }
 
-        [Inject] NavigationManager NavManager { get; set; } = default!;
+        public int GetDisplayedScore(int playerId)
+        {
+            // Get base score
+            int baseScore = PlayerScores[playerId].PlayerScore;
+
+            // Only subtract darts for the current player
+            if (Players[CurrentPlayerIndex].Id != playerId)
+                return baseScore;
+
+            int dartOne = int.TryParse(InputScoreDartOne, out var v1) ? v1 : 0;
+            int dartTwo = int.TryParse(InputScoreDartTwo, out var v2) ? v2 : 0;
+            int dartThree = int.TryParse(InputScoreDartThree, out var v3) ? v3 : 0;
+            int subtract = dartOne + dartTwo + dartThree;
+
+            int liveScore = baseScore - subtract;
+
+            if (liveScore < 0 || liveScore == 1)
+            {
+                // Player has busted
+                liveScore = baseScore;
+            }
+
+            return liveScore;
+        }
         private void GoHome()
         {
             NavManager.NavigateTo("/");
@@ -539,19 +563,19 @@ namespace DartsScoreboard
                     return;
                 }
             }
-            else if (PlayerScores[currentPlayer.Id].PlayerScore < 0)
+            else if (PlayerScores[currentPlayer.Id].PlayerScore < 0 || PlayerScores[currentPlayer.Id].PlayerScore == 1)
             {
                 // Player has busted
                 PlayerScores[currentPlayer.Id].PlayerScore += score;
+
                 PlayerScores[currentPlayer.Id].PlayerThrows += 3;
                 PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
-            }
-            else if (PlayerScores[currentPlayer.Id].PlayerScore == 1)
-            {
-                // Player has busted
-                PlayerScores[currentPlayer.Id].PlayerScore += score;
-                PlayerScores[currentPlayer.Id].PlayerThrows += 3;
-                PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
+                PlayerScores[currentPlayer.Id].PlayerCollectedScore += 0;
+
+                currentPlayer.Stats.ThreeDartLegAverage = (double)((StartingScore - PlayerScores[currentPlayer.Id].PlayerScore) / ((double)PlayerScores[currentPlayer.Id].PlayerThrowsLeg / 3));
+                currentPlayer.Stats.ThreeDartAverage = (double)(PlayerScores[currentPlayer.Id].PlayerCollectedScore / ((double)PlayerScores[currentPlayer.Id].PlayerThrows / 3));
+
+                CurrentPlayerIndex = (CurrentPlayerIndex + 1) % Players.Count;
             }
             else
             {
@@ -814,17 +838,28 @@ namespace DartsScoreboard
                         DartIndex = 1;
                         await SubmitScore();
                     }
-                    else 
+                    else if (PlayerScores[currentPlayer.Id].PlayerScore - int.Parse(value) < 2)
+                    {
+                        // player bust
+                        InputScoreDartOne = "";
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else
+                    {
                         DartIndex = 2;
+                    }
                     break;
                 case 2:
                     InputScoreDartTwo = value;
-                    if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier == "D" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
+                    if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier == "D" 
+                        && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
                     {
                         DartIndex = 1;
                         await SubmitScore();
                     }
-                    else if (GameSettings.EndInOption == "MASTER OUT" && (SelectedMultiplier == "D" || SelectedMultiplier == "T") && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
+                    else if (GameSettings.EndInOption == "MASTER OUT" && (SelectedMultiplier == "D" || SelectedMultiplier == "T") 
+                                && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
                     {
                         DartIndex = 1;
                         await SubmitScore();
@@ -834,7 +869,9 @@ namespace DartsScoreboard
                         DartIndex = 1;
                         await SubmitScore();
                     }
-                    else if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier != "D" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
+                    else if ((GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier != "D" 
+                                && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
+                                    || PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) < 2)
                     {
                         InputScoreDartOne = "";
                         InputScoreDartTwo = "";
@@ -846,12 +883,14 @@ namespace DartsScoreboard
                     break;
                 case 3:
                     InputScoreDartThree = value;
-                    if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier == "D" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
+                    if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier == "D"
+                            && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
                     {
                         DartIndex = 1;
                         await SubmitScore();
                     }
-                    else if (GameSettings.EndInOption == "MASTER OUT" && (SelectedMultiplier == "D" || SelectedMultiplier == "T") && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
+                    else if (GameSettings.EndInOption == "MASTER OUT" && (SelectedMultiplier == "D" || SelectedMultiplier == "T") 
+                                && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
                     {
                         DartIndex = 1;
                         await SubmitScore();
@@ -861,7 +900,9 @@ namespace DartsScoreboard
                         DartIndex = 1;
                         await SubmitScore();
                     }
-                    else if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier != "D" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
+                    else if ((GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier != "D" 
+                                && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
+                                    || PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) < 2)
                     {
                         InputScoreDartOne = "";
                         InputScoreDartTwo = "";
@@ -1042,6 +1083,137 @@ namespace DartsScoreboard
                     new() { Text = "Del", Value = "DEL" }
                 }
             }
+        };
+
+
+
+        // Creating suggestion dictionary
+        public Dictionary<string, List<string>> SuggestionFinishes = new Dictionary<string, List<string>>()
+        {
+            { "170", new List<string> { "T20", "T20", "DB" } },
+            { "167", new List<string> { "T20", "T19", "DB" } },
+            { "164", new List<string> { "T19", "T19", "DB" } },
+            { "161", new List<string> { "T20", "T17", "DB" } },
+            { "160", new List<string> { "T20", "T20", "D20" } },
+            { "158", new List<string> { "T20", "T20", "D19" } },
+            { "157", new List<string> { "T20", "T19", "D20" } },
+            { "156", new List<string> { "T20", "T20", "D18" } },
+            { "155", new List<string> { "T20", "T19", "D19" } },
+            { "154", new List<string> { "T20", "T18", "D20" } },
+            { "153", new List<string> { "T20", "T19", "D18" } },
+            { "152", new List<string> { "T20", "T20", "D16" } },
+            { "151", new List<string> { "T20", "T17", "D20" } },
+            { "150", new List<string> { "T20", "T18", "D18" } },
+            { "149", new List<string> { "T20", "T19", "D16" } },
+            { "148", new List<string> { "T20", "T16", "D20" } },
+            { "147", new List<string> { "T20", "T17", "D18" } },
+            { "146", new List<string> { "T20", "T18", "D16" } },
+            { "145", new List<string> { "T20", "T15", "D20" } },
+            { "144", new List<string> { "T20", "T20", "D12" } },
+            { "143", new List<string> { "T20", "T17", "D16" } },
+            { "142", new List<string> { "T20", "T14", "D20" } },
+            { "141", new List<string> { "T20", "T19", "D12" } },
+            { "140", new List<string> { "T20", "T20", "D10" } },
+            { "139", new List<string> { "T19", "T14", "D20" } },
+            { "138", new List<string> { "T20", "T18", "D12" } },
+            { "137", new List<string> { "T20", "T19", "D10" } },
+            { "136", new List<string> { "T20", "T20", "D8" } },
+            { "135", new List<string> { "T20", "T17", "D12" } },
+            { "134", new List<string> { "T20", "T14", "D16" } },
+            { "133", new List<string> { "T20", "T19", "D8" } },
+            { "132", new List<string> { "T20", "T16", "D12" } },
+            { "131", new List<string> { "T20", "T13", "D16" } },
+            { "130", new List<string> { "T20", "T18", "D8" } },
+            { "129", new List<string> { "T19", "T16", "D12" } },
+            { "128", new List<string> { "T18", "T14", "D16" } },
+            { "127", new List<string> { "T20", "T17", "D8" } },
+            { "126", new List<string> { "T19", "T19", "D6" } },
+            { "125", new List<string> { "25", "T20", "D20" } },
+            { "124", new List<string> { "T20", "T16", "D8" } },
+            { "123", new List<string> { "T19", "T16", "D9" } },
+            { "122", new List<string> { "T18", "T18", "D7" } },
+            { "121", new List<string> { "T20", "T11", "D14" } },
+            { "120", new List<string> { "20", "T20", "D20" } },
+            { "119", new List<string> { "T19", "T12", "D13" } },
+            { "118", new List<string> { "20", "18", "D20" } },
+            { "117", new List<string> { "20", "17", "D20" } },
+            { "116", new List<string> { "20", "16", "D20" } },
+            { "115", new List<string> { "19", "18", "D20" } },
+            { "114", new List<string> { "20", "14", "D20" } },
+            { "113", new List<string> { "20", "13", "D20" } },
+            { "112", new List<string> { "T20", "12", "D20" } },
+            { "111", new List<string> { "T20", "19", "D16" } },
+            { "110", new List<string> { "T20", "10", "D20" } },
+            { "109", new List<string> { "T20", "9", "D20" } },
+            { "108", new List<string> { "T20", "16", "D20" } },
+            { "107", new List<string> { "T19", "10", "D20" } },
+            { "106", new List<string> { "T20", "6", "D20" } },
+            { "105", new List<string> { "T19", "6", "D20" } },
+            { "104", new List<string> { "T18", "10", "D20" } },
+            { "103", new List<string> { "T20", "11", "D16" } },
+            { "102", new List<string> { "T20", "10", "D16" } },
+            { "101", new List<string> { "T17", "10", "D20" } },
+            { "100", new List<string> { "T20", "D20" } },
+            { "99", new List<string> { "T19", "10", "D16" } },
+            { "98", new List<string> { "T20", "18", "D10" } },
+            { "97", new List<string> { "T19", "20", "D10" } },
+            { "96", new List<string> { "T20", "D18" } },
+            { "95", new List<string> { "T19", "D19" } },
+            { "94", new List<string> { "T18", "D20" } },
+            { "93", new List<string> { "T19", "D18" } },
+            { "92", new List<string> { "T20", "D16" } },
+            { "91", new List<string> { "T17", "D20" } },
+            { "90", new List<string> { "T20", "D15" } },
+            { "89", new List<string> { "T19", "D16" } },
+            { "88", new List<string> { "T16", "D20" } },
+            { "87", new List<string> { "T17", "D18" } },
+            { "86", new List<string> { "T18", "D16" } },
+            { "85", new List<string> { "T15", "D20" } },
+            { "84", new List<string> { "T20", "D12" } },
+            { "83", new List<string> { "T17", "D16" } },
+            { "82", new List<string> { "Bull", "D16" } },
+            { "81", new List<string> { "T19", "D12" } },
+            { "80", new List<string> { "T20", "D10" } },
+            { "79", new List<string> { "T13", "D20" } },
+            { "78", new List<string> { "T18", "D12" } },
+            { "77", new List<string> { "T19", "D10" } },
+            { "76", new List<string> { "T20", "D8" } },
+            { "75", new List<string> { "T17", "D12" } },
+            { "74", new List<string> { "T14", "D16" } },
+            { "73", new List<string> { "T19", "D8" } },
+            { "72", new List<string> { "T16", "D12" } },
+            { "71", new List<string> { "T13", "D16" } },
+            { "70", new List<string> { "T18", "D8" } },
+            { "69", new List<string> { "T19", "D6" } },
+            { "68", new List<string> { "T20", "D4" } },
+            { "67", new List<string> { "T17", "D8" } },
+            { "66", new List<string> { "T10", "D18" } },
+            { "65", new List<string> { "SB", "D20" } },
+            { "64", new List<string> { "T16", "D8" } },
+            { "63", new List<string> { "T17", "D6" } },
+            { "62", new List<string> { "T10", "D16" } },
+            { "61", new List<string> { "SB", "D18" } },
+            { "60", new List<string> { "20", "D20" } },
+            { "59", new List<string> { "19", "D20" } },
+            { "58", new List<string> { "18", "D20" } },
+            { "57", new List<string> { "17", "D20" } },
+            { "56", new List<string> { "16", "D20" } },
+            { "55", new List<string> { "15", "D20" } },
+            { "54", new List<string> { "14", "D20" } },
+            { "53", new List<string> { "13", "D20" } },
+            { "52", new List<string> { "12", "D20" } },
+            { "51", new List<string> { "11", "D20" } },
+            { "50", new List<string> { "10", "D20" } },
+            { "49", new List<string> { "9", "D20" } },
+            { "48", new List<string> { "16", "D16" } },
+            { "47", new List<string> { "15", "D16" } },
+            { "46", new List<string> { "14", "D16" } },
+            { "45", new List<string> { "13", "D16" } },
+            { "44", new List<string> { "12", "D16" } },
+            { "43", new List<string> { "11", "D16" } },
+            { "42", new List<string> { "10", "D16" } },
+            { "41", new List<string> { "9", "D16" } },
+            { "40", new List<string> { "D20" } },
         };
     }
 }

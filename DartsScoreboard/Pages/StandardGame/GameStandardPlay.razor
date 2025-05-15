@@ -51,7 +51,13 @@ else
                             Legs: @PlayerScores[player.Id].PlayerLegs, Sets: @PlayerScores[player.Id].PlayerSets
                         </span>
                     </h3>
-                    <p>Score: @PlayerScores[player.Id].PlayerScore</p>
+                    <p>
+                        Score: @GetDisplayedScore(player.Id)
+                        @if (SuggestionFinishes.TryGetValue(GetDisplayedScore(player.Id).ToString(), out var suggestions))
+                        {
+                            <span class="text-muted"> (@string.Join(", ", suggestions))</span>
+                        }
+                    </p>
                     <p>Leg Average: @player.Stats.ThreeDartLegAverage.ToString("F2")</p>
                     <p>Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
                     <p>Number of darts: @PlayerScores[player.Id].PlayerThrowsLeg.ToString()</p>
