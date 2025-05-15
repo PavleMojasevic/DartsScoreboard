@@ -13,7 +13,10 @@
             <div class="card p-3 mb-3">
                 <h4>@player.Name @(player.Id == Players[CurrentPlayerIndex].Id ? "(Winner 🏆)" : "")</h4>
                 <p>Three-Dart Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
+                <p>Best three-dart average leg: @player.Stats.BestThreeDartLegAverage.ToString("F2")</p>
                 <p>Checkout Percentage: @player.Stats.CheckoutPercentage.ToString("F2")%</p>
+                <p>Best leg: @player.Stats.BestNumOfDartsThrown.ToString()</p>
+                <p>Worst leg: @player.Stats.WorstNumOfDartsThrown.ToString()</p>
                 <p>Highest Score: @player.Stats.HighestScore</p>
 
                 <h5>High Scores Hit:</h5>
@@ -51,6 +54,7 @@ else
                     <p>Score: @PlayerScores[player.Id].PlayerScore</p>
                     <p>Leg Average: @player.Stats.ThreeDartLegAverage.ToString("F2")</p>
                     <p>Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
+                    <p>Number of darts: @PlayerScores[player.Id].PlayerThrowsLeg.ToString()</p>
                 </div>
             }
         </div>

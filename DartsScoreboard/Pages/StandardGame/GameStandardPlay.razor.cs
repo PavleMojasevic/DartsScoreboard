@@ -31,7 +31,6 @@ namespace DartsScoreboard
         [Inject] public IStandardGamePersistence _StandardGamePersistence { get; set; }
         [Inject] public IUserPersistence _UserPersistence { get; set; }
         [Inject] public GameSettingsService GameSettings { get; set; } = default!;
-        [Inject] StandardGameUserService StandardGameUserService { get; set; } = default!;
 
         // Player info
         public List<User> Players { get; set; } = new();
@@ -117,8 +116,6 @@ namespace DartsScoreboard
             }
 
             // Fallback: Start new game
-            PlayerService.SelectedPlayers = StandardGameUserService.Players;
-            Players = PlayerService.SelectedPlayers;
             GameCode = GameCode == "" ? Guid.NewGuid().ToString() : GameCode;
 
             StartingScore = GameSettings.StartingScore;
@@ -175,7 +172,7 @@ namespace DartsScoreboard
             var currentPlayer = Players[CurrentPlayerIndex];
             return NoFinishScores.Contains(PlayerScores[currentPlayer.Id].PlayerScore);
         }
-        private async Task DoubleOutCheckout(int score)
+        private void DoubleOutCheckout(int score)
         {
             var currentPlayer = Players[CurrentPlayerIndex];
 
@@ -337,16 +334,12 @@ namespace DartsScoreboard
             SelectedMultiplier = "S";
             if (UseThreeDartMode)
             {
-                if (InputScoreDartOne != "" && InputScoreDartTwo != "" && InputScoreDartThree != "" || PlayerScores[currentPlayer.Id].PlayerScore - CombineScore() == 0)
-                {
-                    InputScore = CombineScore().ToString();
-                }
-                else
-                {
-                    // Invalid score
-                    InputScore = "";
-                    return;
-                }
+                InputScore = CombineScore().ToString();
+            }
+
+            if (InputScore == "")
+            {
+                InputScore = "0";
             }
 
             if (int.TryParse(InputScore, out int score))
@@ -414,7 +407,7 @@ namespace DartsScoreboard
                             }
                         }
 
-                        await DoubleOutCheckout(score);
+                        DoubleOutCheckout(score);
                     }
 
                     if (!ShowCheckoutPopup)
@@ -474,6 +467,20 @@ namespace DartsScoreboard
                 if (PlayerScores[currentPlayer.Id].PlayerLegs + 1 == NumOfLegs)
                 {
                     PlayerScores[currentPlayer.Id].PlayerSets++;
+
+                    // Check best number of darts thrown leg
+                    if (currentPlayer.Stats.BestNumOfDartsThrown == 0 || currentPlayer.Stats.BestNumOfDartsThrown > PlayerScores[currentPlayer.Id].PlayerThrowsLeg)
+                    {
+                        currentPlayer.Stats.BestNumOfDartsThrown = PlayerScores[currentPlayer.Id].PlayerThrowsLeg;
+                    }
+
+                    // Check worst number of darts thrown leg
+                    if (currentPlayer.Stats.WorstNumOfDartsThrown == 0 || currentPlayer.Stats.WorstNumOfDartsThrown < PlayerScores[currentPlayer.Id].PlayerThrowsLeg)
+                    {
+                        currentPlayer.Stats.WorstNumOfDartsThrown = PlayerScores[currentPlayer.Id].PlayerThrowsLeg;
+                    }
+
+                    // Reset player scores
                     foreach (var players in Players)
                     {
                         PlayerScores[players.Id].PlayerLegs = 0;
@@ -484,10 +491,30 @@ namespace DartsScoreboard
                     // Rotate starting player for next leg/set
                     StartingPlayerIndexSets = (StartingPlayerIndexSets + 1) % Players.Count;
                     CurrentPlayerIndex = StartingPlayerIndexSets;
+
+                    // Check best three dart leg average
+                    if (currentPlayer.Stats.BestThreeDartLegAverage < currentPlayer.Stats.ThreeDartLegAverage)
+                    {
+                        currentPlayer.Stats.BestThreeDartLegAverage = currentPlayer.Stats.ThreeDartLegAverage;
+                    }
                 }
                 else
                 {
                     PlayerScores[currentPlayer.Id].PlayerLegs++;
+
+                    // Check best number of darts thrown leg
+                    if (currentPlayer.Stats.BestNumOfDartsThrown == 0 || currentPlayer.Stats.BestNumOfDartsThrown > PlayerScores[currentPlayer.Id].PlayerThrowsLeg)
+                    {
+                        currentPlayer.Stats.BestNumOfDartsThrown = PlayerScores[currentPlayer.Id].PlayerThrowsLeg;
+                    }
+
+                    // Check worst number of darts thrown leg
+                    if (currentPlayer.Stats.WorstNumOfDartsThrown == 0 || currentPlayer.Stats.WorstNumOfDartsThrown < PlayerScores[currentPlayer.Id].PlayerThrowsLeg)
+                    {
+                        currentPlayer.Stats.WorstNumOfDartsThrown = PlayerScores[currentPlayer.Id].PlayerThrowsLeg;
+                    }
+
+                    // Reset player scores
                     foreach (var players in Players)
                     {
                         PlayerScores[players.Id].PlayerScore = GameSettings.StartingScore;
@@ -497,6 +524,12 @@ namespace DartsScoreboard
                     // Rotate starting player for next leg/set
                     StartingPlayerIndexLegs = (StartingPlayerIndexLegs + 1) % Players.Count;
                     CurrentPlayerIndex = StartingPlayerIndexLegs;
+
+                    // Check best three dart leg average
+                    if (currentPlayer.Stats.BestThreeDartLegAverage < currentPlayer.Stats.ThreeDartLegAverage)
+                    {
+                        currentPlayer.Stats.BestThreeDartLegAverage = currentPlayer.Stats.ThreeDartLegAverage;
+                    }
                 }
 
                 if (PlayerScores[currentPlayer.Id].PlayerSets == NumOfSets)
@@ -744,29 +777,103 @@ namespace DartsScoreboard
             {
                 if (key.Value == "MISS")
                 {
-                    ApplyDart("0");
+                    await ApplyDart("0");
                 }
                 else
                 {
-                    ApplyDart(key.Value);
+                    await ApplyDart(key.Value);
                 }
             }
         }
-        private void ApplyDart(string value)
+        private async Task ApplyDart(string value)
         {
+            var currentPlayer = Players[CurrentPlayerIndex];
+
             switch (DartIndex)
             {
                 case 1:
                     InputScoreDartOne = value;
-                    DartIndex = 2;
+                    if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier == "D" && PlayerScores[currentPlayer.Id].PlayerScore - int.Parse(value) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "MASTER OUT" && (SelectedMultiplier == "D" || SelectedMultiplier == "T") && PlayerScores[currentPlayer.Id].PlayerScore - int.Parse(value) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "STRAIGHT OUT" && PlayerScores[currentPlayer.Id].PlayerScore - int.Parse(value) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier != "D" && PlayerScores[currentPlayer.Id].PlayerScore - int.Parse(value) == 0)
+                    {
+                        InputScoreDartOne = "";
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else 
+                        DartIndex = 2;
                     break;
                 case 2:
                     InputScoreDartTwo = value;
-                    DartIndex = 3;
+                    if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier == "D" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "MASTER OUT" && (SelectedMultiplier == "D" || SelectedMultiplier == "T") && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "STRAIGHT OUT" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier != "D" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(value)) == 0)
+                    {
+                        InputScoreDartOne = "";
+                        InputScoreDartTwo = "";
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else
+                        DartIndex = 3;
                     break;
                 case 3:
                     InputScoreDartThree = value;
-                    // DartIndex = 1; // wrap around or submit here
+                    if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier == "D" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "MASTER OUT" && (SelectedMultiplier == "D" || SelectedMultiplier == "T") && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "STRAIGHT OUT" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else if (GameSettings.EndInOption == "DOUBLE OUT" && SelectedMultiplier != "D" && PlayerScores[currentPlayer.Id].PlayerScore - (int.Parse(InputScoreDartOne) + int.Parse(InputScoreDartTwo) + int.Parse(value)) == 0)
+                    {
+                        InputScoreDartOne = "";
+                        InputScoreDartTwo = "";
+                        InputScoreDartThree = "";
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
+                    else
+                    {
+                        DartIndex = 1;
+                        await SubmitScore();
+                    }
                     break;
             }
         }
@@ -853,35 +960,35 @@ namespace DartsScoreboard
             {
                 new List<KeyboardKey>
                 {
-                    new() { Text = "2", Value = "2" },
-                    new() { Text = "4", Value = "4" },
-                    new() { Text = "6", Value = "6" },
-                    new() { Text = "8", Value = "8" },
-                    new() { Text = "10", Value = "10" }
+                    new() { Text = "D1", Value = "2" },
+                    new() { Text = "D2", Value = "4" },
+                    new() { Text = "D3", Value = "6" },
+                    new() { Text = "D4", Value = "8" },
+                    new() { Text = "D5", Value = "10" }
                 },
                 new List<KeyboardKey>
                 {
-                    new() { Text = "12", Value = "12" },
-                    new() { Text = "14", Value = "14" },
-                    new() { Text = "16", Value = "16" },
-                    new() { Text = "18", Value = "18" },
-                    new() { Text = "20", Value = "20" }
+                    new() { Text = "D6", Value = "12" },
+                    new() { Text = "D7", Value = "14" },
+                    new() { Text = "D8", Value = "16" },
+                    new() { Text = "D9", Value = "18" },
+                    new() { Text = "D10", Value = "20" }
                 },
                 new List<KeyboardKey>
                 {
-                    new() { Text = "22", Value = "22" },
-                    new() { Text = "24", Value = "24" },
-                    new() { Text = "26", Value = "26" },
-                    new() { Text = "28", Value = "28" },
-                    new() { Text = "30", Value = "30" }
+                    new() { Text = "D11", Value = "22" },
+                    new() { Text = "D12", Value = "24" },
+                    new() { Text = "D13", Value = "26" },
+                    new() { Text = "D14", Value = "28" },
+                    new() { Text = "D15", Value = "30" }
                 },
                 new List<KeyboardKey>
                 {
-                    new() { Text = "32", Value = "32" },
-                    new() { Text = "34", Value = "34" },
-                    new() { Text = "36", Value = "36" },
-                    new() { Text = "38", Value = "38" },
-                    new() { Text = "40", Value = "40" }
+                    new() { Text = "D16", Value = "32" },
+                    new() { Text = "D17", Value = "34" },
+                    new() { Text = "D18", Value = "36" },
+                    new() { Text = "D19", Value = "38" },
+                    new() { Text = "D20", Value = "40" }
                 },
                 new List<KeyboardKey>
                 {
@@ -898,35 +1005,35 @@ namespace DartsScoreboard
             {
                 new List<KeyboardKey>
                 {
-                    new() { Text = "3", Value = "3" },
-                    new() { Text = "6", Value = "6" },
-                    new() { Text = "9", Value = "9" },
-                    new() { Text = "12", Value = "12" },
-                    new() { Text = "15", Value = "15" }
+                    new() { Text = "T1", Value = "3" },
+                    new() { Text = "T2", Value = "6" },
+                    new() { Text = "T3", Value = "9" },
+                    new() { Text = "T4", Value = "12" },
+                    new() { Text = "T5", Value = "15" }
                 },
                 new List<KeyboardKey>
                 {
-                    new() { Text = "18", Value = "18" },
-                    new() { Text = "21", Value = "21" },
-                    new() { Text = "24", Value = "24" },
-                    new() { Text = "27", Value = "27" },
-                    new() { Text = "30", Value = "30" }
+                    new() { Text = "T6", Value = "18" },
+                    new() { Text = "T7", Value = "21" },
+                    new() { Text = "T8", Value = "24" },
+                    new() { Text = "T9", Value = "27" },
+                    new() { Text = "T10", Value = "30" }
                 },
                 new List<KeyboardKey>
                 {
-                    new() { Text = "33", Value = "33" },
-                    new() { Text = "36", Value = "36" },
-                    new() { Text = "39", Value = "39" },
-                    new() { Text = "42", Value = "42" },
-                    new() { Text = "45", Value = "45" }
+                    new() { Text = "T11", Value = "33" },
+                    new() { Text = "T12", Value = "36" },
+                    new() { Text = "T13", Value = "39" },
+                    new() { Text = "T14", Value = "42" },
+                    new() { Text = "T15", Value = "45" }
                 },
                 new List<KeyboardKey>
                 {
-                    new() { Text = "48", Value = "48" },
-                    new() { Text = "51", Value = "51" },
-                    new() { Text = "54", Value = "54" },
-                    new() { Text = "57", Value = "57" },
-                    new() { Text = "60", Value = "60" }
+                    new() { Text = "T16", Value = "48" },
+                    new() { Text = "T17", Value = "51" },
+                    new() { Text = "T18", Value = "54" },
+                    new() { Text = "T19", Value = "57" },
+                    new() { Text = "T20", Value = "60" }
                 },
                 new List<KeyboardKey>
                 {
