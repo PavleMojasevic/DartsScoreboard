@@ -48,7 +48,7 @@ namespace DartsScoreboard
         // Keyboard selection
         public bool UseThreeDartMode { get; set; } = false;
         public string SelectedMultiplier { get; set; } = "S"; // "S", "D", or "T"
-
+            
         // Winner popup
         public bool WinnerPopup { get; set; } = false;
 
@@ -150,26 +150,45 @@ namespace DartsScoreboard
             }
         }
 
+        private void SwitchToRegularMode()
+        {
+            UseThreeDartMode = false;
+            InputScoreDartOne = "";
+            InputScoreDartTwo = "";
+            InputScoreDartThree = "";
+            DartIndex = 1;
+        }
+        private void SwitchToThreeDartMode()
+        {
+            UseThreeDartMode = true;
+            InputScore = "";
+            DartIndex = 1;
+        }
+
         public int GetDisplayedScore(int playerId)
         {
             // Get base score
             int baseScore = PlayerScores[playerId].PlayerScore;
 
+            int liveScore = baseScore; // Default to base score
             // Only subtract darts for the current player
             if (Players[CurrentPlayerIndex].Id != playerId)
                 return baseScore;
 
-            int dartOne = int.TryParse(InputScoreDartOne, out var v1) ? v1 : 0;
-            int dartTwo = int.TryParse(InputScoreDartTwo, out var v2) ? v2 : 0;
-            int dartThree = int.TryParse(InputScoreDartThree, out var v3) ? v3 : 0;
-            int subtract = dartOne + dartTwo + dartThree;
-
-            int liveScore = baseScore - subtract;
-
-            if (liveScore < 0 || liveScore == 1)
+            if (UseThreeDartMode)
             {
-                // Player has busted
-                liveScore = baseScore;
+                int dartOne = int.TryParse(InputScoreDartOne, out var v1) ? v1 : 0;
+                int dartTwo = int.TryParse(InputScoreDartTwo, out var v2) ? v2 : 0;
+                int dartThree = int.TryParse(InputScoreDartThree, out var v3) ? v3 : 0;
+                int subtract = dartOne + dartTwo + dartThree;
+
+                liveScore = baseScore - subtract;
+
+                if (liveScore < 0 || liveScore == 1)
+                {
+                    // Player has busted
+                    liveScore = baseScore;
+                }
             }
 
             return liveScore;
@@ -491,6 +510,9 @@ namespace DartsScoreboard
                 if (PlayerScores[currentPlayer.Id].PlayerLegs + 1 == NumOfLegs)
                 {
                     PlayerScores[currentPlayer.Id].PlayerSets++;
+                    // Darts per leg
+                    currentPlayer.Stats.DartsPerLeg = (double)(PlayerScores[currentPlayer.Id].PlayerThrowsLeg / (double)NumOfLegs);
+                    currentPlayer.Stats.TotalDartsThrown += PlayerScores[currentPlayer.Id].PlayerThrowsLeg;
 
                     // Check best number of darts thrown leg
                     if (currentPlayer.Stats.BestNumOfDartsThrown == 0 || currentPlayer.Stats.BestNumOfDartsThrown > PlayerScores[currentPlayer.Id].PlayerThrowsLeg)
@@ -525,6 +547,9 @@ namespace DartsScoreboard
                 else
                 {
                     PlayerScores[currentPlayer.Id].PlayerLegs++;
+                    // Darts per leg
+                    currentPlayer.Stats.DartsPerLeg = (double)(PlayerScores[currentPlayer.Id].PlayerThrowsLeg / (double)NumOfLegs);
+                    currentPlayer.Stats.TotalDartsThrown += PlayerScores[currentPlayer.Id].PlayerThrowsLeg;
 
                     // Check best number of darts thrown leg
                     if (currentPlayer.Stats.BestNumOfDartsThrown == 0 || currentPlayer.Stats.BestNumOfDartsThrown > PlayerScores[currentPlayer.Id].PlayerThrowsLeg)
@@ -559,6 +584,7 @@ namespace DartsScoreboard
                 if (PlayerScores[currentPlayer.Id].PlayerSets == NumOfSets)
                 {
                     WinnerPopup = true; 
+                    await UpdateUserStats(currentPlayer);
                     await _StandardGamePersistence.Remove(GameCode);
                     return;
                 }
@@ -619,11 +645,71 @@ namespace DartsScoreboard
 
             await SaveGameAsync();
         }
+
+        // TODO: Add a method to save the game to a player
+        private async Task AddGameToPlayer(User player)
+        {
+            var existingUser = await _UserPersistence.GetUser(player.Id);
+            if (existingUser == null)
+            {
+                return;
+            }
+
+            existingUser.Games.Add(GameCode);
+        }
+        private async Task UpdateUserStats(User user)
+        {
+            var existingUser = await _UserPersistence.GetUser(user.Id);
+            if (existingUser == null)
+            {
+                return;
+            }
+
+            var current = existingUser.Stats;
+            var recent = user.Stats;
+
+            // Checkout percentage
+            double totalHits = (current.CheckoutPercentage / 100.0) * current.NumOfDoublesThrown + (recent.CheckoutPercentage / 100.0) * recent.NumOfDoublesThrown;
+            int totalAttempts = current.NumOfDoublesThrown + recent.NumOfDoublesThrown;
+            current.CheckoutPercentage = (totalHits / totalAttempts) * 100;
+            current.NumOfDoublesThrown = totalAttempts;
+
+            // Three dart average
+            double totalDartsThrown = current.TotalDartsThrown + recent.TotalDartsThrown;
+            current.ThreeDartAverage = (current.ThreeDartAverage * current.TotalDartsThrown + recent.ThreeDartAverage * recent.TotalDartsThrown) / totalDartsThrown;
+            current.TotalDartsThrown = totalDartsThrown;
+
+            // High score hits
+            foreach (var kvp in user.Stats.HighScoreHits)
+            {
+                if (current.HighScoreHits.ContainsKey(kvp.Key))
+                    current.HighScoreHits[kvp.Key] += kvp.Value;
+                else
+                    current.HighScoreHits[kvp.Key] = kvp.Value;
+            }
+
+            // Darts per leg
+            if (current.DartsPerLeg == 0)
+                current.DartsPerLeg = recent.DartsPerLeg;
+            else if (recent.DartsPerLeg == 0)
+                current.DartsPerLeg = current.DartsPerLeg;
+            else
+                current.DartsPerLeg = (current.DartsPerLeg + recent.DartsPerLeg) / 2;
+
+            // Best three dart leg average
+            if (user.Stats.BestThreeDartLegAverage > current.BestThreeDartLegAverage)
+            {
+                current.BestThreeDartLegAverage = user.Stats.BestThreeDartLegAverage;
+            }
+
+            await _UserPersistence.Update(existingUser);
+        }
         private async Task SaveGameAsync()
         {
             var save = new StandardGame
             {
                 Code = GameCode,
+                LastModified = DateTime.UtcNow,
                 Players = Players,
                 StartingPoints = StartingScore,
                 NumOfSets = NumOfSets,

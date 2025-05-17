@@ -12,6 +12,7 @@ public partial class Home
     }
     private async Task OpenStats()
     {
+        NavManager.NavigateTo("/PlayersStats");
     }
     private async Task TestAddUser()
     {

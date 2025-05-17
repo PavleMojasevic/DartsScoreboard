@@ -68,8 +68,8 @@ else
         <div class="input-area">
             <!-- Mode Switch -->
             <div class="btn-group mb-3" role="group">
-                <button class="btn @(UseThreeDartMode ? "btn-outline-secondary" : "btn-primary")" @onclick="() => UseThreeDartMode = false">Regular</button>
-                <button class="btn @(UseThreeDartMode ? "btn-primary" : "btn-outline-secondary")" @onclick="() => UseThreeDartMode = true">3 Darts</button>
+                <button class="btn @(UseThreeDartMode ? "btn-outline-secondary" : "btn-primary")" @onclick="() => SwitchToRegularMode()">Regular</button>
+                <button class="btn @(UseThreeDartMode ? "btn-primary" : "btn-outline-secondary")" @onclick="() => SwitchToThreeDartMode()">3 Darts</button>
             </div>
 
             @if (UseThreeDartMode)

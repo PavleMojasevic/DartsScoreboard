@@ -13,7 +13,7 @@ else
         @foreach (var game in SavedGamesList)
         {
             <li style="margin-bottom: 10px;">
-                <strong>Game Code:</strong> @game.Code
+                <strong>Date:</strong> @game.LastModified.ToLocalTime().ToString("g")
                 <br />
                 <strong>Players:</strong> @string.Join(", ", game.Players.Select(p => p.Name))
                 <br />

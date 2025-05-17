@@ -1,7 +1,18 @@
 ﻿using IndexedDB.Blazor;
 using System;
+using System.Data;
 
 namespace DartsScoreboard;
+
+public interface IUserPersistence
+{
+    Task Update(User user);
+    Task AddUser(User user);
+    Task<List<User>> GetAllUsers();
+    Task<User?> GetUser(int id);
+    Task RemoveUser(int id);
+    Task UpdateUser(User user);
+}
 
 public class UserPersistence : IUserPersistence
 {
@@ -10,6 +21,16 @@ public class UserPersistence : IUserPersistence
     public UserPersistence(IIndexedDbFactory dbFactory)
     {
         _DbFactory = dbFactory;
+    }
+    public async Task Update(User user)
+    {
+        using var db = await _DbFactory.Create<DartsScoreBoardDb>();
+        var dbUser = db.Users.FirstOrDefault(x => x.Id == user.Id);
+        if (dbUser == null)
+            return;
+        dbUser.Name = user.Name;
+        dbUser.Stats = user.Stats;
+        await db.SaveChanges();
     }
     public async Task AddUser(User user)
     {

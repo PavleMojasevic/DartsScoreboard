@@ -6,10 +6,16 @@ public class User
     public int Id { get; set; }
     public string Name { get; set; }
     public UserStats Stats { get; set; } = new ();
+    public List<string> Games { get; set; } = new ();
 }
 
 public class UserStats
 {
+    // Additional statistics
+    public double DartsPerLeg { get; set; }
+    public double TotalDartsThrown { get; set; }
+
+    // Basic statistics
     public double ThreeDartAverage { get; set; }
     public double ThreeDartLegAverage { get; set; }
     public double BestThreeDartLegAverage { get; set; }

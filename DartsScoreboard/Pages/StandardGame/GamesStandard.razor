@@ -121,3 +121,12 @@
         </div>
     </div>
 }
+@if (ErrorPopup)
+{
+    <div class="error-popup">
+        <div class="error-content">
+            <p>@CurrentErrorMessage</p>
+            <button class="btn btn-danger mt-2" @onclick="ClearErrorMessage">Close</button>
+        </div>
+    </div>
+}

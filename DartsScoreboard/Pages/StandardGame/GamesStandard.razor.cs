@@ -10,11 +10,14 @@ namespace DartsScoreboard
         [Parameter] public string GameCode { get; set; } = "";
 
         [Inject] NavigationManager NavManager { get; set; } = default!;
-        [Inject] IUserPersistence UserPersistence { get; set; } = default!;
         [Inject] IStandardGamePersistence _StandardGamePersistence { get; set; } = default!;
         [Inject] public GameSettingsService GameSettings { get; set; } = default!;
         [Inject] DbInitializerService DbInit { get; set; } = default!;
         [Inject] PlayerSelectionService PlayerService { get; set; } = default!;
+
+        // Error popup
+        public bool ErrorPopup { get; set; } = false;
+        private string? CurrentErrorMessage;
 
         private bool IsFull => PlayerService.SelectedPlayers.Count >= 4;
         protected override async Task OnInitializedAsync()
@@ -23,6 +26,16 @@ namespace DartsScoreboard
 
             // now it is safe to call anything that uses db.Users.ToList() etc.
             await PlayerService.LoadAllUsersAsync();
+        }
+        private void ShowErrorMessage(string message)
+        {
+            CurrentErrorMessage = message;
+        }
+
+        private void ClearErrorMessage()
+        {
+            CurrentErrorMessage = null;
+            ErrorPopup = false;
         }
 
         private void OnUserSelected(ChangeEventArgs e)
@@ -68,7 +81,8 @@ namespace DartsScoreboard
         {
             if (PlayerService.SelectedPlayers == null || PlayerService.SelectedPlayers.Count == 0)
             {
-                // Optionally, show a message or toast here
+                ErrorPopup = true;
+                ShowErrorMessage("Please select at least one player.");
                 return;
             }
 

@@ -4,6 +4,7 @@ public class StandardGame
 {
     [System.ComponentModel.DataAnnotations.Key]
     public string Code { get; set; } = "";
+    public DateTime LastModified { get; set; } = DateTime.UtcNow;
 
     // Game configuration
     public List<User> Players { get; set; } = new();

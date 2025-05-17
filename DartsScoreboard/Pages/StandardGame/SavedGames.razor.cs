@@ -12,7 +12,10 @@ namespace DartsScoreboard
 
         protected override async Task OnInitializedAsync()
         {
-            SavedGamesList = await _StandardGamePersistence.GetAll();
+            //SavedGamesList = await _StandardGamePersistence.GetAll();
+            SavedGamesList = (await _StandardGamePersistence.GetAll())
+                .OrderByDescending(g => g.LastModified)
+                .ToList();
         }
 
         private void ResumeGame(string code)
