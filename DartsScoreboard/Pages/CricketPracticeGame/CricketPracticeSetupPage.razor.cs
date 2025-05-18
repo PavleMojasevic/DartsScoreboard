@@ -41,7 +41,7 @@ namespace DartsScoreboard
                      Players = PlayerService.SelectedPlayers.Select(x => new CricketPracticeGamePlayer
                      {
                          UserId = x.Id < 0 ? null : x.Id,
-                         GuestName = x.Id < 0 ? x.Name : null,
+                         GuestName = x.Id < 0 ? x.Name : "Guest",
                          Throws = new()
                      }).ToList(),
 

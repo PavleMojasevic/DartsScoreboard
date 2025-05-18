@@ -10,4 +10,5 @@ public class DartsScoreBoardDb : IndexedDb
     public IndexedSet<User> Users { get; set; }
     public IndexedSet<CricketPracticeGame> CricketPracticeGames { get; set; }
     public IndexedSet<StandardGame> StandardGames { get; set; }
+    public IndexedSet<CricketGame> CricketGames { get; set; }
 }

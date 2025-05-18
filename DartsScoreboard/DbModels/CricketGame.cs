@@ -11,10 +11,19 @@ public class CricketGame
 public class CricketPlayer
 {
     public int Id { get; set; }
-    public int UserId { get; set; }
-    public int GuestUserName { get; set; }
+    public int? UserId { get; set; }
+    public string GuestName { get; set; }
     public List<CricketThrow> Throws { get; set; } = new();
-    public List<CricketNumberScore> Scores { get; set; } = new();
+    public List<CricketNumberScore> Scores { get; set; } = new()
+    {
+        new CricketNumberScore(){Target="20",Count=0 },
+        new CricketNumberScore(){Target="19",Count=0 },
+        new CricketNumberScore(){Target="18",Count=0 },
+        new CricketNumberScore(){Target="17",Count=0 },
+        new CricketNumberScore(){Target="16",Count=0 },
+        new CricketNumberScore(){Target="15",Count=0 },
+        new CricketNumberScore(){Target="BULL",Count=0 },
+    };
     public int Points { get; set; }
 
 

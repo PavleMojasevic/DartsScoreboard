@@ -11,6 +11,7 @@ public static class ServiceExtensions
         services.AddTransient<ICricketPracticeGamePersistence, CricketPracticeGamePersistence>();
         services.AddSingleton<IIndexedDbFactory, IndexedDbFactory>();
         services.AddTransient<IStandardGamePersistence, StandardGamePersistence>();
+        services.AddTransient<ICricketPersistence, CricketPersistence>();
 
         services.AddSingleton<DbInitializerService>();
         services.AddSingleton<GameSettingsService>();

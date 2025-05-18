@@ -1,0 +1,650 @@
+/* /Components/Keyboard.razor.rz.scp.css */
+.keyboard-container[b-ir72ch1lzh] {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    gap: 5px; /* Fixed gap between rows */
+}
+
+.keyboard-row[b-ir72ch1lzh] {
+    display: flex;
+    flex: 1;
+    gap: 5px; /* Fixed gap between keys */
+}
+
+.keyboard-key[b-ir72ch1lzh] {
+    flex: 1;
+    color:white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    border: 2px solid #ccc;
+    border-radius: 4px; 
+    text-align: center;
+    overflow: hidden; /* Prevent text overflow */
+}
+/* /Layout/MainLayout.razor.rz.scp.css */
+.page[b-q5me8szs52] {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+main[b-q5me8szs52] {
+    flex: 1;
+}
+
+.sidebar[b-q5me8szs52] {
+    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+}
+
+.top-row[b-q5me8szs52] {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #d6d5d5;
+    justify-content: flex-end;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+    .top-row[b-q5me8szs52]  a, .top-row[b-q5me8szs52]  .btn-link {
+        white-space: nowrap;
+        margin-left: 1.5rem;
+        text-decoration: none;
+    }
+
+    .top-row[b-q5me8szs52]  a:hover, .top-row[b-q5me8szs52]  .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .top-row[b-q5me8szs52]  a:first-child {
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+@media (max-width: 640.98px) {
+    .top-row[b-q5me8szs52] {
+        justify-content: space-between;
+    }
+
+    .top-row[b-q5me8szs52]  a, .top-row[b-q5me8szs52]  .btn-link {
+        margin-left: 0;
+    }
+}
+
+@media (min-width: 641px) {
+    .page[b-q5me8szs52] {
+        flex-direction: row;
+    }
+
+    .sidebar[b-q5me8szs52] {
+        width: 250px;
+        height: 100vh;
+        position: sticky;
+        top: 0;
+    }
+
+    .top-row[b-q5me8szs52] {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .top-row.auth[b-q5me8szs52]  a:first-child {
+        flex: 1;
+        text-align: right;
+        width: 0;
+    }
+
+    .top-row[b-q5me8szs52], article[b-q5me8szs52] {
+        padding-left: 2rem !important;
+        padding-right: 1.5rem !important;
+    }
+}
+/* /Layout/NavMenu.razor.rz.scp.css */
+.navbar-toggler[b-04pp25k92r] {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.top-row[b-04pp25k92r] {
+    min-height: 3.5rem;
+    background-color: rgba(0,0,0,0.4);
+}
+
+.navbar-brand[b-04pp25k92r] {
+    font-size: 1.1rem;
+}
+
+.bi[b-04pp25k92r] {
+    display: inline-block;
+    position: relative;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.75rem;
+    top: -1px;
+    background-size: cover;
+}
+
+.bi-house-door-fill-nav-menu[b-04pp25k92r] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-house-door-fill' viewBox='0 0 16 16'%3E%3Cpath d='M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5Z'/%3E%3C/svg%3E");
+}
+
+.bi-plus-square-fill-nav-menu[b-04pp25k92r] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-plus-square-fill' viewBox='0 0 16 16'%3E%3Cpath d='M2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2zm6.5 4.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3a.5.5 0 0 1 1 0z'/%3E%3C/svg%3E");
+}
+
+.bi-list-nested-nav-menu[b-04pp25k92r] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-list-nested' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M4.5 11.5A.5.5 0 0 1 5 11h10a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 3 7h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm-2-4A.5.5 0 0 1 1 3h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E");
+}
+
+.nav-item[b-04pp25k92r] {
+    font-size: 0.9rem;
+    padding-bottom: 0.5rem;
+}
+
+    .nav-item:first-of-type[b-04pp25k92r] {
+        padding-top: 1rem;
+    }
+
+    .nav-item:last-of-type[b-04pp25k92r] {
+        padding-bottom: 1rem;
+    }
+
+    .nav-item[b-04pp25k92r]  a {
+        color: #d7d7d7;
+        border-radius: 4px;
+        height: 3rem;
+        display: flex;
+        align-items: center;
+        line-height: 3rem;
+    }
+
+.nav-item[b-04pp25k92r]  a.active {
+    background-color: rgba(255,255,255,0.37);
+    color: white;
+}
+
+.nav-item[b-04pp25k92r]  a:hover {
+    background-color: rgba(255,255,255,0.1);
+    color: white;
+}
+
+@media (min-width: 641px) {
+    .navbar-toggler[b-04pp25k92r] {
+        display: none;
+    }
+
+    .collapse[b-04pp25k92r] {
+        /* Never collapse the sidebar for wide screens */
+        display: block;
+    }
+
+    .nav-scrollable[b-04pp25k92r] {
+        /* Allow sidebar to scroll for tall menus */
+        height: calc(100vh - 3.5rem);
+        overflow-y: auto;
+    }
+}
+/* /Pages/CricketPracticeGame/CricketPracticeFinalPage.razor.rz.scp.css */
+.table-responsive[b-msxkgn04o0] {  
+   margin: 20px 0;  
+}  
+
+.table[b-msxkgn04o0] {  
+   width: 100%;  
+   border-collapse: collapse;  
+   background-color: transparent; /* Transparent background */  
+   color: white; /* White text color */  
+}  
+
+.table th[b-msxkgn04o0], .table td[b-msxkgn04o0] {  
+   text-align: center;  
+   padding: 10px;
+   background-color:transparent;
+   color: white; /* Ensure text in cells is white */  
+}  
+
+.table th[b-msxkgn04o0] {  
+   background-color: rgba(255, 255, 255, 0.1); /* Slightly transparent white for header */  
+   font-weight: bold;  
+}
+.action-buttons[b-msxkgn04o0]
+{
+    display:flex;
+    width:100%;
+    gap:20px;
+
+}
+.action-button[b-msxkgn04o0]
+{
+    width:100%;
+    height:60px;
+    border-radius:15px;
+    color:white;
+    background-color:var(--color1);
+}
+h3[b-msxkgn04o0]
+{
+    text-align:center;
+    color:white;
+}
+.main-div[b-msxkgn04o0]
+{
+    margin :10px;
+
+}
+/* /Pages/CricketPracticeGame/CricketPracticeGamePage.razor.rz.scp.css */
+.main-container[b-n7itw7llj5] {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100vh;
+    width: 100vw;
+    padding: 20px 20px;
+}
+.undo-redo[b-n7itw7llj5]
+{
+    border-radius:10px;
+    background-color:var(--color1);
+    color:white;
+    padding:10px;
+}
+.top-buttons[b-n7itw7llj5] {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.target-container[b-n7itw7llj5] {
+    width: 100%;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.target-num[b-n7itw7llj5] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 45px;
+    width: 120px;
+    height: 120px;
+    border-radius: 15px;
+    background-color: var(--color1);
+}
+
+.players-and-keyboard[b-n7itw7llj5] {
+    width: 100%;
+}
+
+.keyboard-padding[b-n7itw7llj5] {
+    height: 20px;
+
+}
+
+.keyboard-container[b-n7itw7llj5] {
+    height: 80px;
+    font-size:35px;
+    color:white  ;
+}
+
+.score-table[b-n7itw7llj5] {
+    border-collapse: collapse;
+    border: 1px solid black;
+    width: 100%;
+    padding:15px;
+    table-layout: fixed;
+}
+
+    .score-table th[b-n7itw7llj5],
+    .score-table td[b-n7itw7llj5] {
+        border: 1px solid black;
+        text-align: center;
+        padding: 8px;
+        word-wrap: break-word;
+    }
+
+        .score-table th:first-child[b-n7itw7llj5],
+        .score-table td:first-child[b-n7itw7llj5] {
+            width: 33%;
+        }
+
+.highlight-column[b-n7itw7llj5] {
+    background-color: var(--color2);
+    color: black;
+}
+/* /Pages/CricketPracticeGame/CricketPracticeSetupPage.razor.rz.scp.css */
+.game-container[b-np2gy8pi5w] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: auto;
+    padding: 1rem;
+}
+
+.player-options[b-np2gy8pi5w], .game-options[b-np2gy8pi5w], .start-button[b-np2gy8pi5w] {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.modal-overlay[b-np2gy8pi5w] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-box[b-np2gy8pi5w] {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+/* /Pages/Cricket/CricketGamePage.razor.rz.scp.css */
+ 
+.container[b-u0x8ph32k5] {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.score-table[b-u0x8ph32k5] {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+    .score-table table[b-u0x8ph32k5] {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+
+    .score-table th[b-u0x8ph32k5], .score-table td[b-u0x8ph32k5] {
+        border: 1px solid #ddd;
+        padding: 6px;
+        text-align: center;
+    }
+
+.bottom-section[b-u0x8ph32k5] {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    background-color: #f0f0f0;
+    padding: 4px;
+}
+
+.info-row[b-u0x8ph32k5] {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.info-box[b-u0x8ph32k5] {
+    flex: 1;
+    text-align: center;
+    padding: 4px;
+    background-color: #ffffff;
+    border-radius: 4px;
+    margin: 0 2px;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.statistics[b-u0x8ph32k5] {
+    text-align: center;
+    font-size: 13px;
+    padding: 4px 0;
+    background-color: #ffffff;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.keyboard-wrapper[b-u0x8ph32k5] {
+    width: 100%;
+    background-color: #e0e0e0;
+}
+/* /Pages/Cricket/CricketSetupPage.razor.rz.scp.css */
+.game-container[b-7dnq8emp65] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: auto;
+    padding: 1rem;
+}
+
+.player-options[b-7dnq8emp65], .game-options[b-7dnq8emp65], .start-button[b-7dnq8emp65] {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+}
+
+.modal-overlay[b-7dnq8emp65] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-box[b-7dnq8emp65] {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+/* /Pages/Games.razor.rz.scp.css */
+.home-button[b-44pf0do7rz] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    min-height: 100px;
+    border-radius: 10px;
+    background-color: var(--color1);
+    color: white;
+    font-size: 20px;
+}
+
+.buttons-div[b-44pf0do7rz] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+    padding-top: 50px;
+}
+/* /Pages/GamesStandard.razor.rz.scp.css */
+.game-container[b-gex81imfti] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: auto;
+    padding: 1rem;
+}
+
+.player-options[b-gex81imfti], .game-options[b-gex81imfti], .start-button[b-gex81imfti] {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 8px;
+}
+.modal-overlay[b-gex81imfti] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-box[b-gex81imfti] {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+.dart-input[b-gex81imfti] {
+    width: 60px;
+    height: 60px;
+    border: 2px solid gray;
+    margin: 0 8px;
+    font-size: 1.5rem;
+    text-align: center;
+    line-height: 60px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+.dart-input.active[b-gex81imfti] {
+    border-color: #007bff;
+    background-color: #e0f0ff;
+}
+/* /Pages/GameStandardPlay.razor.rz.scp.css */
+.modal-overlay[b-1g3yvo3335] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* semi-transparent background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-box[b-1g3yvo3335] {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    text-align: center;
+}
+.input-area[b-1g3yvo3335] {
+    display: flex;
+    flex-direction: column;
+    height: 50vh; /* Half of the screen height */
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.input-display[b-1g3yvo3335] {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.submit-button[b-1g3yvo3335] {
+    margin-top: 10px;
+}
+
+.keyboard-container[b-1g3yvo3335] {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
+.dart-input[b-1g3yvo3335] {
+    width: 60px;
+    height: 60px;
+    border: 2px solid gray;
+    margin: 0 8px;
+    font-size: 1.5rem;
+    text-align: center;
+    line-height: 60px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+    color:black;
+}
+
+.dart-input.active[b-1g3yvo3335] {
+    border-color: #007bff;
+    background-color: #e0f0ff;
+}
+.player-box[b-1g3yvo3335]
+{
+    padding:10px;
+}
+.text-muted[b-1g3yvo3335]
+{
+    color:white !important;
+}
+.current-player[b-1g3yvo3335] {
+    border: 2px solid #007bff;
+    background-color: var(--color1);
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+.main-container[b-1g3yvo3335] { 
+    padding: 20px 20px;
+}
+/* /Pages/Home.razor.rz.scp.css */
+.home-button[b-wernusml5j] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    min-height: 100px;
+    border-radius: 10px;
+    background-color: var(--color1);
+    color: white;
+    font-size: 20px;
+}
+.buttons-div[b-wernusml5j] {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+    padding-top:50px;
+}
+/* /Pages/KeyboardTest.razor.rz.scp.css */
+.keyboard-test[b-yay7oz8hhn] {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 150px;
+    padding: 20px;
+    background-color: var(--color1);
+}
+/* /Pages/PlayerSelectorDialog.razor.rz.scp.css */
+
+.modal-box[b-dqtb4js4fv] {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+}
+/* /Pages/Settings.razor.rz.scp.css */
+body[b-qnd8cku6ge] {
+}

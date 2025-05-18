@@ -6,8 +6,6 @@ namespace DartsScoreboard
     public partial class Games
     {
         [Inject] public NavigationManager navManager { get; set; } = default!;
-        [Inject] public ICricketPracticeGamePersistence _CricketPracticeGamePersistence { get; set; }
-        [Inject] public IUserPersistence _UserPersistence { get; set; } = default!;
         private void Standard()
         {
             navManager.NavigateTo("/gamesStandard");
@@ -19,6 +17,10 @@ namespace DartsScoreboard
         private async Task CricketPractice()
         {
             navManager.NavigateTo("/cricket-practice-setup");
+        }
+        private async Task Cricket()
+        {
+            navManager.NavigateTo("/cricket-setup");
         }
     }
 }
