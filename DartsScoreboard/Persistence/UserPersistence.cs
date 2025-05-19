@@ -30,6 +30,7 @@ public class UserPersistence : IUserPersistence
             return;
         dbUser.Name = user.Name;
         dbUser.Stats = user.Stats;
+        dbUser.GameHistory = user.GameHistory;
         await db.SaveChanges();
     }
     public async Task AddUser(User user)

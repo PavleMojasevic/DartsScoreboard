@@ -28,6 +28,35 @@ else
 
         <button class="btn btn-secondary mt-3" @onclick="GoBack">Back</button>
     </div>
+    @if (Player.GameHistory != null && Player.GameHistory.Any())
+    {
+        <h4 class="mt-4">Game History</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>3-Dart Avg</th>
+                    <th>Checkout %</th>
+                    <th>Total Darts</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var game in Player.GameHistory.OrderByDescending(g => g.Timestamp))
+                {
+                    <tr>
+                        <td>@game.Timestamp.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@game.OldThreeDartAverage.ToString("F2")</td>
+                        <td>@game.OldCheckoutPercentage.ToString("F2")%</td>
+                        <td>@game.OldTotalDartsThrown</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No previous games found.</p>
+    }
 }
 
 @code {

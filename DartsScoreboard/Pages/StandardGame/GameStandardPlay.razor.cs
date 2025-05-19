@@ -583,7 +583,8 @@ namespace DartsScoreboard
 
                 if (PlayerScores[currentPlayer.Id].PlayerSets == NumOfSets)
                 {
-                    WinnerPopup = true; 
+                    WinnerPopup = true;
+
                     await UpdateUserStats(currentPlayer);
                     await _StandardGamePersistence.Remove(GameCode);
                     return;
@@ -646,17 +647,6 @@ namespace DartsScoreboard
             await SaveGameAsync();
         }
 
-        // TODO: Add a method to save the game to a player
-        private async Task AddGameToPlayer(User player)
-        {
-            var existingUser = await _UserPersistence.GetUser(player.Id);
-            if (existingUser == null)
-            {
-                return;
-            }
-
-            existingUser.Games.Add(GameCode);
-        }
         private async Task UpdateUserStats(User user)
         {
             var existingUser = await _UserPersistence.GetUser(user.Id);
@@ -702,6 +692,16 @@ namespace DartsScoreboard
                 current.BestThreeDartLegAverage = user.Stats.BestThreeDartLegAverage;
             }
 
+            // Game history
+            existingUser.GameHistory.Add(new OldGamesStats
+            {
+                GameCode = GameCode,
+                OldThreeDartAverage = user.Stats.ThreeDartAverage,
+                OldCheckoutPercentage = user.Stats.CheckoutPercentage,
+                OldTotalDartsThrown = user.Stats.TotalDartsThrown,
+                Timestamp = DateTime.UtcNow
+            });
+
             await _UserPersistence.Update(existingUser);
         }
         private async Task SaveGameAsync()
@@ -731,7 +731,8 @@ namespace DartsScoreboard
                 {
                     Id = p.Id,
                     Name = p.Name,
-                    Stats = p.Stats
+                    Stats = p.Stats,
+                    GameHistory = p.GameHistory
                 }).ToList(),
                 UndoHistory = UndoStack.Reverse().ToList()
             };

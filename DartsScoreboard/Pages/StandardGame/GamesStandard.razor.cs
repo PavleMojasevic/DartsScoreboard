@@ -125,7 +125,18 @@ namespace DartsScoreboard
                             ["60+"] = 0,
                             ["40+"] = 0
                         }
+                    },
+                    GameHistory = new List<OldGamesStats>
+                    {
+                        new OldGamesStats
+                        {
+                            GameCode = gameCode,
+                            OldThreeDartAverage = 0,
+                            OldCheckoutPercentage = 0,
+                            OldTotalDartsThrown = 0
+                        }
                     }
+
                 }).ToList()
             };
 

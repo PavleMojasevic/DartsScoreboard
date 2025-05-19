@@ -6,7 +6,7 @@ public class User
     public int Id { get; set; }
     public string Name { get; set; }
     public UserStats Stats { get; set; } = new ();
-    public List<string> Games { get; set; } = new ();
+    public List<OldGamesStats> GameHistory { get; set; } = new ();
 }
 
 public class UserStats
@@ -37,4 +37,13 @@ public class UserStats
         { "60+", 0 },
         { "40+", 0 }
     };
+}
+
+public class OldGamesStats
+{
+    public string GameCode { get; set; }
+    public double OldThreeDartAverage { get; set; }
+    public double OldCheckoutPercentage { get; set; }
+    public double OldTotalDartsThrown { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
 }
