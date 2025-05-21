@@ -1,6 +1,8 @@
 ﻿using DartsScoreboard.Models;
 using DartsScoreboard.Services;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Web;
+using MudBlazor;
 
 
 namespace DartsScoreboard
@@ -10,10 +12,25 @@ namespace DartsScoreboard
         [Parameter] public string GameCode { get; set; } = "";
 
         [Inject] NavigationManager NavManager { get; set; } = default!;
-        [Inject] IStandardGamePersistence _StandardGamePersistence { get; set; } = default!;
         [Inject] public GameSettingsService GameSettings { get; set; } = default!;
         [Inject] DbInitializerService DbInit { get; set; } = default!;
         [Inject] PlayerSelectionService PlayerService { get; set; } = default!;
+        [Inject] IStandardGamePersistence _StandardGamePersistence { get; set; } = default!;
+        [Inject] ISnackbar snackbar { get; set; }
+
+        // Game settings
+        public int SelectedScore { get; set; } = 501;
+        public string SelectedStartWith { get; set; } = "STRAIGHT IN";
+        public string SelectedEndWith { get; set; } = "DOUBLE OUT";
+        public int SelectedNumOfLegs { get; set; } = 1;
+        public int SelectedNumOfSets { get; set; } = 1;
+
+        //  MudBlazor select
+        private string _style = "custom-gradient";
+        private string _starting_score = "501";
+        private string _start_with = "STRAIGHT IN";
+        private string _finish_with = "DOUBLE OUT";
+        public string WriteScoreText { get; set; } 
 
         // Error popup
         public bool ErrorPopup { get; set; } = false;
@@ -23,8 +40,6 @@ namespace DartsScoreboard
         protected override async Task OnInitializedAsync()
         {
             await DbInit.EnsureStoresCreated();
-
-            // now it is safe to call anything that uses db.Users.ToList() etc.
             await PlayerService.LoadAllUsersAsync();
         }
         private void ShowErrorMessage(string message)
@@ -49,30 +64,6 @@ namespace DartsScoreboard
                 }
             }
         }
-
-        // Game settings
-        public int SelectedScore { get; set; } = 501;
-        public string SelectedStartWith { get; set; } = "STRAIGHT IN";
-        public string SelectedEndWith { get; set; } = "DOUBLE OUT";
-        public int SelectedNumOfLegs { get; set; } = 1;
-        public int SelectedNumOfSets { get; set; } = 1;
-
-        public List<int> StartingScoreOptions { get; set; } = new() { 301, 501, 701 };
-        public List<string> StartingOptions { get; set; } = new() { "STRAIGHT IN", "DOUBLE IN", "MASTER IN" };
-        public List<string> EndingOptions { get; set; } = new() { "DOUBLE OUT", "MASTER OUT", "STRAIGHT OUT" };
-
-        private void SelectScore(int score)
-        {
-            SelectedScore = score;
-        }
-        private void SelectIn(string startWith)
-        {
-            SelectedStartWith = startWith;
-        }
-        private void SelectOut(string endWith)
-        {
-            SelectedEndWith = endWith;
-        }
         private void GoToSavedGames()
         {
             NavManager.NavigateTo("/saved-games");
@@ -87,6 +78,16 @@ namespace DartsScoreboard
             }
 
             string gameCode = Guid.NewGuid().ToString();
+
+            if(_starting_score == "Custom")
+            {
+                SelectedScore = int.TryParse(WriteScoreText, out int score) ? score : 501;
+            }
+            else
+                SelectedScore = int.TryParse(_starting_score, out int score) ? score : 501;
+
+            SelectedStartWith = _start_with;
+            SelectedEndWith = _finish_with;
 
             GameSettings.SetGameOptions(SelectedScore, SelectedStartWith, SelectedEndWith, SelectedNumOfLegs, SelectedNumOfSets);
 

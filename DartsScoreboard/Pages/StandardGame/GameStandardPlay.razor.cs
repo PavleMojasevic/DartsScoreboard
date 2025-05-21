@@ -1,5 +1,6 @@
 ﻿using DartsScoreboard.Services;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 using System.Numerics;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -29,9 +30,10 @@ namespace DartsScoreboard
 
         [Inject] NavigationManager NavManager { get; set; } = default!;
         [Inject] public PlayerSelectionService PlayerService { get; set; } = default!;
+        [Inject] public GameSettingsService GameSettings { get; set; } = default!;
         [Inject] public IStandardGamePersistence _StandardGamePersistence { get; set; }
         [Inject] public IUserPersistence _UserPersistence { get; set; }
-        [Inject] public GameSettingsService GameSettings { get; set; } = default!;
+        [Inject] ISnackbar Snackbar { get; set; } = default!;
 
         // Player info
         public List<User> Players { get; set; } = new();
@@ -460,7 +462,14 @@ namespace DartsScoreboard
                 }
                 else
                 {
-                    // Invalid score
+                    // Invalid score 
+                    Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+                    Snackbar.Add("Invalid score", Severity.Error, options => 
+                    {
+                        options.RequireInteraction = false;
+                        options.HideIcon = false;
+                        options.VisibleStateDuration = 500;
+                    });
                     InputScore = "";
                     return;
                 }
@@ -474,7 +483,14 @@ namespace DartsScoreboard
 
             if (score > 180 || PlayerScores[currentPlayer.Id].PlayerScore - score < 0)
             {
-                // Invalid score
+                // Invalid score 
+                Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomCenter;
+                Snackbar.Add("Invalid score", Severity.Error, options =>
+                {
+                    options.RequireInteraction = false;
+                    options.HideIcon = false;
+                    options.VisibleStateDuration = 500;
+                });
                 InputScore = "";
                 return;
             }

@@ -1,5 +1,6 @@
 ﻿@namespace DartsScoreboard
 @page "/gamesStandard"
+@using MudBlazor
 
 <h2>Game</h2>
 
@@ -32,53 +33,47 @@
         <h4>Game settings</h4>
         <!-- Score Options -->
         <div class="form-group mb-3">
-            <div class="btn-group" role="group">
-                @foreach (var score in StartingScoreOptions)
-                {
-                    <button type="button"
-                            class="btn @(SelectedScore == score ? "btn-primary" : "btn-outline-primary")"
-                            @onclick="() => SelectScore(score)">
-                        @score
-                    </button>
-                }
-            </div>
+            <MudStack>
+                <MudToggleGroup T="string" Color="Color.Primary" SelectedClass="@_style" @bind-Value="_starting_score">
+                    <MudToggleItem Value="@("301")" />
+                    <MudToggleItem Value="@("501")" />
+                    <MudToggleItem Value="@("701")" />
+                    <MudToggleItem Value="@("Custom")" />
+                </MudToggleGroup>
+            </MudStack>
+            @if (_starting_score == "Custom")
+            {
+                <MudTextField @bind-Value="WriteScoreText" Label="Filled" Variant="Variant.Filled" Style="color:white"></MudTextField>
+			}
         </div>
         <!-- Start With Options -->
         <div class="form-group mb-3">
-            <div class="btn-group" role="group">
-                @foreach (var startWith in StartingOptions)
-                {
-                    <button type="button"
-                            class="btn @(SelectedStartWith == startWith ? "btn-primary" : "btn-outline-primary")"
-                            @onclick="() => SelectIn(startWith)">
-                        @startWith
-                    </button>
-                }
-            </div>
+            <MudStack>
+                <MudToggleGroup T="string" Color="Color.Primary" SelectedClass="@_style" @bind-Value="_start_with">
+                    <MudToggleItem Value="@("STRAIGHT IN")" />
+                    <MudToggleItem Value="@("DOUBLE IN")" />
+                    <MudToggleItem Value="@("MASTER IN")" />
+                </MudToggleGroup>
+            </MudStack>
         </div>
         <!-- End With Options -->
         <div class="form-group">
-            <div class="btn-group" role="group">
-                @foreach (var endWith in EndingOptions)
-                {
-                    <button type="button"
-                            class="btn @(SelectedEndWith == endWith ? "btn-primary" : "btn-outline-primary")"
-                            @onclick="() => SelectOut(endWith)">
-                        @endWith
-                    </button>
-                }
-            </div>
+            <MudStack>
+                <MudToggleGroup T="string" Color="Color.Primary" SelectedClass="@_style" @bind-Value="_finish_with">
+                    <MudToggleItem Value="@("DOUBLE OUT")" />
+                    <MudToggleItem Value="@("MASTER OUT")" />
+                    <MudToggleItem Value="@("STRAIGHT OUT")" />
+                </MudToggleGroup>
+            </MudStack>
         </div>
         <!-- Number of Legs -->
         <div class="form-group mb-3">
-            <label>Number of Legs:</label>
-            <input type="number" min="1" class="form-control" @bind="SelectedNumOfLegs" />
+            <MudNumericField @bind-Value="SelectedNumOfLegs" Label="Number of legs" Style="color: white" Variant="Variant.Text" Min="1" Max="100" />
         </div>
 
         <!-- Number of Sets -->
         <div class="form-group mb-3">
-            <label>Number of Sets:</label>
-            <input type="number" min="1" class="form-control" @bind="SelectedNumOfSets" />
+            <MudNumericField @bind-Value="SelectedNumOfSets" Label="Number of sets" Variant="Variant.Text" Style="color: white" Min="1" Max="100" />
         </div>
     </div>
 
