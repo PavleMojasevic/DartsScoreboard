@@ -11,4 +11,5 @@ public class KeyboardKey
     public Func<bool>? IsDisabled { get; set; }
     public string Style { get; set; } = "";
     public string StyleDisabled { get; set; } = "";
+    public int? HitCount { get; set; } = null;
 }
