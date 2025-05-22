@@ -59,21 +59,73 @@
     border-color: #007bff;
     background-color: #e0f0ff;
 }
-.player-box
-{
-    padding:10px;
-}
 .text-muted
 {
     color:lightgray !important;
 }
-.current-player {
-    border: 2px solid #007bff;
-    background-color: var(--color1);
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 123, 255, 0.3);
-    transition: all 0.3s ease-in-out;
-}
 .main-container { 
     padding: 20px 20px;
+}
+/* Input score textbox */
+::deep .text-field-style .mud-input-root {
+    border: 2px solid gray;
+    margin: 0 8px;
+    font-size: 1.5rem;
+    text-align: center;
+    border-radius: 15px;
+    border-color: #6200EA;
+    border-width: 3px;
+    background-color: #e0f0ff;
+    color: black;
+}
+
+/* Dart keyboard selection */
+::deep .centered-button-group {
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically (if inside a flex container) */
+    margin: 16px auto; /* Add vertical spacing and center block */
+    width: 100%; /* Stretch to full width */
+    max-width: 400px; /* Optional: Limit max width */
+}
+
+/* Player look */
+.player-box {
+    border: 2px solid black;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+    background-color: white;
+    max-width: 400px;
+}
+
+.current-player {
+    background-color: #b3e5fc !important; /* Light blue */
+}
+
+.player-header {
+    border: 2px solid black;
+    padding: 6px 10px;
+    margin-bottom: 12px;
+    background-color: white;
+}
+
+.player-main-score {
+    margin: 16px 0;
+}
+
+.main-score {
+    font-weight: bold;
+}
+
+.suggestion {
+    font-style: italic;
+}
+
+.player-stats {
+    font-size: 0.95rem;
+}
+.mud-theme-primary {
+    background-color: #b3d9f7;
+    border: 2px solid black;
 }

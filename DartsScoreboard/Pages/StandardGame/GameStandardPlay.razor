@@ -41,36 +41,39 @@
 else
 {
     <div class="main-container">
-        <div class="players">
-            @foreach (var player in Players)
-            {
-                <div class="player-box @(Players[CurrentPlayerIndex].Id == player.Id ? "current-player" : "")">
-                    <h3>
-                        @player.Name
-                        <span class="text-muted" style="font-size: 1.5rem;">
-                            Legs: @PlayerScores[player.Id].PlayerLegs, Sets: @PlayerScores[player.Id].PlayerSets
-                        </span>
-                    </h3>
-                    <p>
-                        Score: @GetDisplayedScore(player.Id)
-                        @if (SuggestionFinishes.TryGetValue(GetDisplayedScore(player.Id).ToString(), out var suggestions))
-                        {
-                            <span class="text-muted"> (@string.Join(", ", suggestions))</span>
-                        }
-                    </p>
-                    <p>Leg Average: @player.Stats.ThreeDartLegAverage.ToString("F2")</p>
-                    <p>Average: @player.Stats.ThreeDartAverage.ToString("F2")</p>
-                    <p>Number of darts: @PlayerScores[player.Id].PlayerThrowsLeg.ToString()</p>
-                </div>
-            }
-        </div>
+        <MudPaper Class="p-4" Style="background-color:#e0f0ff">
+            <MudGrid>
+                @foreach (var player in Players)
+                {
+                    <MudItem xs="6">
+                        <MudPaper Class="@GetPlayerClass(player)">
+                            <MudText Typo="Typo.h6">@player.Name</MudText>
+                            <MudText Typo="Typo.h6">@GetDisplayedScore(player.Id)</MudText>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+
+            <MudPaper Class="mt-4 p-4 mud-theme-primary">
+                @if (Players != null && Players?.Count > CurrentPlayerIndex)
+                {
+                    <MudText Typo="Typo.subtitle1" Align="Align.Center">@Players[CurrentPlayerIndex].Name</MudText>
+                    <MudText Typo="Typo.h3" Align="Align.Center" Class="font-bold">@GetDisplayedScore(Players[CurrentPlayerIndex].Id)</MudText>
+                }
+                <MudText Typo="Typo.subtitle1" Align="Align.Center">@GetSuggestedOut()</MudText>
+
+                <MudText Typo="Typo.subtitle2" Class="mt-4">Average: @GetAverage()</MudText>
+                <MudText Typo="Typo.subtitle2">Leg average: @GetLegAverage()</MudText>
+                <MudText Typo="Typo.subtitle2">Darts: @GetDartsThrown()</MudText>
+            </MudPaper>
+        </MudPaper>
 
         <div class="input-area">
             <!-- Mode Switch -->
-            <div class="btn-group mb-3" role="group">
-                <button class="btn @(UseThreeDartMode ? "btn-outline-secondary" : "btn-primary")" @onclick="() => SwitchToRegularMode()">Regular</button>
-                <button class="btn @(UseThreeDartMode ? "btn-primary" : "btn-outline-secondary")" @onclick="() => SwitchToThreeDartMode()">3 Darts</button>
-            </div>
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Filled" Class="centered-button-group">
+                <MudButton FullWidth="true" onclick="SwitchToRegularMode">Regular</MudButton>
+                <MudButton FullWidth="true" onclick="SwitchToThreeDartMode">3 Darts</MudButton>
+            </MudButtonGroup>
 
             @if (UseThreeDartMode)
             {
@@ -80,6 +83,8 @@ else
                     <div class="dart-input @(DartIndex == 2 ? "active" : "")">@InputScoreDartTwo</div>
                     <div class="dart-input @(DartIndex == 3 ? "active" : "")">@InputScoreDartThree</div>
                 </div>
+
+                <MudButton Class="mb-3" Style="height:80px" Variant="Variant.Filled" Color="Color.Primary" onclick="SubmitScore">Submit</MudButton>
 
                 <!-- Multiplier Mode Switch -->
                 <div class="btn-group mb-3" role="group">
@@ -101,23 +106,14 @@ else
                         <Keyboard KeyboardParameters="KeyboardParamsEachDartSingle" KeyClick="HandleKeyEachDart" />
                         break;
                 }
-
-                <div class="submit-button mt-2">
-                    <button class="btn btn-success" @onclick="SubmitScore">Submit</button>
-                </div>
             }
             else
             {
                 <!-- Regular Input Mode -->
-                <div class="input-display text-center mb-2">
-                    <h2>Input: @InputScore</h2>
-                </div>
-
-                <div class="submit-button">
-                    <button class="btn btn-success" @onclick="SubmitScore">
-                        Submit
-                    </button>
-                </div>
+                <MudStack Row="true" Spacing="2" Justify="Justify.Center">
+                    <MudTextField @bind-Value="InputScore" Variant="Variant.Outlined" Disabled="true" Class="text-field-style"/>
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" onclick="SubmitScore">Submit</MudButton>
+                </MudStack>
 
                 <div class="keyboard-container">
                     <Keyboard KeyboardParameters="KeyboardParams" KeyClick="HandleKey" />

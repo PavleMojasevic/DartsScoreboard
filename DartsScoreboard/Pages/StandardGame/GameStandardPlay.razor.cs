@@ -4,6 +4,7 @@ using MudBlazor;
 using System.Numerics;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using static MudBlazor.CategoryTypes;
 
 namespace DartsScoreboard
 {
@@ -140,6 +141,45 @@ namespace DartsScoreboard
                 };
             }
         }
+        private string GetPlayerClass(User player)
+        {
+            if (Players == null || Players.Count == 0 || CurrentPlayerIndex >= Players.Count)
+                return "pa-2";
+            return player == Players[CurrentPlayerIndex] ? "pa-2 mud-theme-primary" : "pa-2";
+        }
+
+        private string GetSuggestedOut()
+        {
+            if (Players == null || Players.Count == 0 || CurrentPlayerIndex >= Players.Count)
+                return "";
+
+            var score = GetDisplayedScore(Players[CurrentPlayerIndex].Id).ToString();
+            if (SuggestionFinishes.TryGetValue(score, out var suggestion))
+                return string.Join(" ", suggestion);
+            return "No outs";
+        }
+
+        private string GetAverage()
+        {
+            if (Players == null || Players.Count == 0 || CurrentPlayerIndex >= Players.Count)
+                return "0.00";
+            return Players[CurrentPlayerIndex].Stats.ThreeDartAverage.ToString("0.00");
+        }
+
+        private string GetLegAverage()
+        {
+            if (Players == null || Players.Count == 0 || CurrentPlayerIndex >= Players.Count)
+                return "0.00";
+            return Players[CurrentPlayerIndex].Stats.ThreeDartLegAverage.ToString("0.00");
+        }
+
+        private int GetDartsThrown()
+        {
+            if (Players == null || Players.Count == 0 || CurrentPlayerIndex >= Players.Count)
+                return 0;
+            return PlayerScores[Players[CurrentPlayerIndex].Id].PlayerThrows;
+        }
+
         private void PlayerStatsToPlayers(List<User> savedStats)
         {
             foreach (var stat in savedStats)
@@ -241,6 +281,8 @@ namespace DartsScoreboard
                 {
                     // Setup the popup
                     AvailableDoubleDartOptions = new List<int> { 0, 1 };
+                    SelectedDartsUsedOnDouble = AvailableDoubleDartOptions.First();
+
                     AvailableCheckoutDartOptions = new();
                     ShowCheckoutPopup = true;
                 }
@@ -255,6 +297,8 @@ namespace DartsScoreboard
                 if (PlayerScores[currentPlayer.Id].PlayerScore - score == 0)
                 {
                     AvailableDoubleDartOptions = new List<int> { 1, 2 };
+                    SelectedDartsUsedOnDouble = AvailableDoubleDartOptions.First();
+
                     if (UseThreeDartMode)
                     {
                         if (InputScoreDartThree != "")
@@ -270,7 +314,8 @@ namespace DartsScoreboard
                     }
                     else
                     {
-                        AvailableCheckoutDartOptions = new List<int> { 2, 3 };      // TODO: Add eachDart keyboard options
+                        AvailableCheckoutDartOptions = new List<int> { 2, 3 };
+                        SelectedDartsUsedOnCheckout = AvailableCheckoutDartOptions.First();
                     }
                     ShowCheckoutPopup = true;
                 }
@@ -284,7 +329,10 @@ namespace DartsScoreboard
                     // Setup the popup
                     PlayerScores[currentPlayer.Id].PlayerThrows += 3;
                     PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
+
                     AvailableDoubleDartOptions = new List<int> { 0, 1, 2 };
+                    SelectedDartsUsedOnDouble = AvailableDoubleDartOptions.First();
+
                     AvailableCheckoutDartOptions = new();
                     ShowCheckoutPopup = true;
                 }
@@ -294,6 +342,8 @@ namespace DartsScoreboard
                 if (PlayerScores[currentPlayer.Id].PlayerScore - score == 0)
                 {
                     AvailableDoubleDartOptions = new List<int> { 1, 2, 3 };
+                    SelectedDartsUsedOnDouble = AvailableDoubleDartOptions.First();
+
                     if (UseThreeDartMode)
                     {
                         if (InputScoreDartThree != "")
@@ -314,7 +364,8 @@ namespace DartsScoreboard
                     }
                     else
                     {
-                        AvailableCheckoutDartOptions = new List<int> { 1, 2, 3 };    // TODO: Add eachDart keyboard options
+                        AvailableCheckoutDartOptions = new List<int> { 1, 2, 3 };
+                        SelectedDartsUsedOnCheckout = AvailableCheckoutDartOptions.First();
                     }
                     ShowCheckoutPopup = true;
                 }
@@ -322,7 +373,10 @@ namespace DartsScoreboard
                 {
                     PlayerScores[currentPlayer.Id].PlayerThrows += 3;
                     PlayerScores[currentPlayer.Id].PlayerThrowsLeg += 3;
+
                     AvailableDoubleDartOptions = new List<int> { 0, 1, 2, 3 };
+                    SelectedDartsUsedOnDouble = AvailableDoubleDartOptions.First();
+
                     AvailableCheckoutDartOptions = new();
                     ShowCheckoutPopup = true;
                 }
@@ -787,6 +841,14 @@ namespace DartsScoreboard
                 player.Stats.ThreeDartAverage = 0;
                 player.Stats.ThreeDartLegAverage = 0;
                 player.Stats.CheckoutPercentage = 0;
+                player.Stats.NumOfDoublesThrown = 0;
+                player.Stats.BestNumOfDartsThrown = 0;
+                player.Stats.WorstNumOfDartsThrown = 0;
+                player.Stats.BestThreeDartLegAverage = 0;
+                player.Stats.DartsPerLeg = 0;
+                player.Stats.TotalDartsThrown = 0;
+                player.Stats.BestThreeDartLegAverage = 0;
+
 
                 foreach (var key in player.Stats.HighScoreHits.Keys.ToList())
                 {
@@ -1317,6 +1379,45 @@ namespace DartsScoreboard
             { "42", new List<string> { "10", "D16" } },
             { "41", new List<string> { "9", "D16" } },
             { "40", new List<string> { "D20" } },
+            { "39", new List<string> { "7", "D16" } },
+            { "38", new List<string> { "D19" } },
+            { "37", new List<string> { "5","D16" } },
+            { "36", new List<string> { "D18" } },
+            { "35", new List<string> { "3", "D16" } },
+            { "34", new List<string> { "D17" } },
+            { "33", new List<string> { "1", "D16" } },
+            { "32", new List<string> { "D16" } },
+            { "31", new List<string> { "15", "D8" } },
+            { "30", new List<string> { "D15" } },
+            { "29", new List<string> { "13", "D8" } },
+            { "28", new List<string> { "D14" } },
+            { "27", new List<string> { "11", "D8" } },
+            { "26", new List<string> { "D13" } },
+            { "25", new List<string> { "9", "D8" } },
+            { "24", new List<string> { "D12" } },
+            { "23", new List<string> { "7", "D8" } },
+            { "22", new List<string> { "D11" } },
+            { "21", new List<string> { "5", "D8" } },
+            { "20", new List<string> { "D10" } },
+            { "19", new List<string> { "3", "D8" } },
+            { "18", new List<string> { "D9" } },
+            { "17", new List<string> { "1", "D8" } },
+            { "16", new List<string> { "D8" } },
+            { "15", new List<string> { "7", "D4" } },
+            { "14", new List<string> { "D7" } },
+            { "13", new List<string> { "5", "D4" } },
+            { "12", new List<string> { "D6" } },
+            { "11", new List<string> { "3", "D4" } },
+            { "10", new List<string> { "D5" } },
+            { "9", new List<string> { "1", "D4" } },
+            { "8", new List<string> { "D4" } },
+            { "7", new List<string> { "3", "D2" } },
+            { "6", new List<string> { "D3" } },
+            { "5", new List<string> { "1", "D2" } },
+            { "4", new List<string> { "D2" } },
+            { "3", new List<string> { "1", "D1" } },
+            { "2", new List<string> { "D1" } }
+
         };
     }
 }
