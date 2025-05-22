@@ -38,8 +38,6 @@ public class CricketPlayer
 }
 public class CricketThrow
 {
-    public bool IsFinishedThrow => !IsEveryThrowIndiviualy ||
-        (FirstDart != null && SecondDart != null && ThirdDart != null);
     public List<CricketNumberScore> Score => GetScore();
     private List<CricketNumberScore> GetScore()
     {

@@ -9,7 +9,7 @@ public class KeyboardKey
     public required string Text { get; set; }
     public required string Value { get; set; }
     public Func<bool>? IsDisabled { get; set; }
+    public Func<int>? HitCount { get; set; }
     public string Style { get; set; } = "";
     public string StyleDisabled { get; set; } = "";
-    public int? HitCount { get; set; } = null;
 }

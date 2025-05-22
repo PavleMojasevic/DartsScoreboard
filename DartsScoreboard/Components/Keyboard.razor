@@ -9,7 +9,7 @@
                 @foreach (KeyboardKey keyboardKey in keyboardRow)
                 {
                     bool isDisabled = keyboardKey.IsDisabled?.Invoke() ?? false;
-                    bool isSelected = keyboardKey.HitCount > 0;
+                    bool isSelected = (keyboardKey.HitCount?.Invoke() ?? 0) > 0;
 
 
                     <button class="@GetClass(keyboardKey, isDisabled, isSelected)"

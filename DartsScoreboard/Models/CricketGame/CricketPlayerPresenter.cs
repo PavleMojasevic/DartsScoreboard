@@ -7,4 +7,6 @@ public class CricketPlayerPresenter
     public int Points { get; set; }
     public List<CricketThrow> Throws { get; set; } = new();
     public List<CricketNumberScore> Scores { get; set; } = new();
+    public double Average => Scores.Sum(x => x.Count) / Throws.Count();
+    public int Marks => Scores.Sum(x => x.Count);
 }
